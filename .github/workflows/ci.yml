@@ -61,15 +61,22 @@ jobs:
           set -o pipefail
           python -m pytest tests -q --timeout=900 -rfE --tb=short 2>&1 | tee pytest-output.txt
         env: { PYTHONIOENCODING: utf-8, RPYTHON_PYTHON: python }
-      - name: publish failure summary (readable without login)
+      - name: publish failure summary (annotations are readable without login)
         if: always()
         shell: bash
         run: |
           echo "## pytest (${{ matrix.os }} / py${{ matrix.python }})" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          grep -E "^(FAILED|ERROR|E  |[0-9]+ (passed|failed)|=+ (short test summary|FAILURES|ERRORS))" pytest-output.txt | head -150 >> "$GITHUB_STEP_SUMMARY" || true
-          tail -n 60 pytest-output.txt >> "$GITHUB_STEP_SUMMARY" || true
+          tail -n 80 pytest-output.txt >> "$GITHUB_STEP_SUMMARY" || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+          python - <<'PY'
+          import re
+          txt = open("pytest-output.txt", encoding="utf-8", errors="replace").read()
+          lines = [l for l in txt.splitlines() if re.match(r"^(FAILED|ERROR) ", l)]
+          tail = [l for l in txt.splitlines() if re.match(r"^\d+ (passed|failed)", l) or l.startswith("E  ")][-40:]
+          msg = "%0A".join((lines + tail)[:60]) or "no FAILED/ERROR lines captured"
+          print(f"::error title=pytest {'${{ matrix.os }}'} py{'${{ matrix.python }}'}::{msg}")
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: "pytest-output-${{ matrix.os }}-py${{ matrix.python }}", path: pytest-output.txt }
