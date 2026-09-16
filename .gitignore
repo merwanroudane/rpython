@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.hypothesis/
+*.rpx/
+r-package/..Rcheck/
+r-package/*.tar.gz
+.Rhistory
+.RData
+*.log

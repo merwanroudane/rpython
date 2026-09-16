@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rpython"
+version = "0.1.0"
+description = "High-level, bidirectional, semantic R <-> Python interoperability: data, models, plots, databases and notebooks without silent loss of meaning."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Merwan Roudane", email = "merwanroudane920@gmail.com" }]
+keywords = ["R", "Python", "interoperability", "econometrics", "panel data", "time series", "arrow", "spatial", "network"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: R",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+]
+
+[project.optional-dependencies]
+arrow = ["pyarrow>=14"]
+polars = ["polars>=0.20", "pyarrow>=14"]
+sparse = ["scipy>=1.10"]
+spatial = ["shapely>=2.0", "pyproj>=3.5", "geopandas>=0.14"]
+network = ["networkx>=3.0"]
+database = ["sqlalchemy>=2.0", "duckdb>=0.9"]
+scientific = ["xarray>=2023.1", "netCDF4"]
+survey = ["pyreadstat>=1.2"]
+survival = ["lifelines>=0.27"]
+ml = ["torch>=2.0"]
+notebook = ["ipython>=8"]
+all = [
+    "rpython[arrow,polars,sparse,spatial,network,database,scientific,survey,survival,ml,notebook]",
+]
+dev = [
+    "pytest>=8",
+    "hypothesis>=6",
+    "pyarrow>=14",
+    "polars>=0.20",
+    "scipy>=1.10",
+    "networkx>=3.0",
+    "shapely>=2.0",
+    "xarray>=2023.1",
+    "duckdb>=0.9",
+    "sqlalchemy>=2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/merwanroudane/rpython"
+Repository = "https://github.com/merwanroudane/rpython"
+Issues = "https://github.com/merwanroudane/rpython/issues"
+
+[project.scripts]
+rpython = "rpython.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rpython = ["r/*.R", "compatibility/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "r: requires a working R runtime",
+    "optional: requires an optional Python dependency",
+    "slow: extended / stress tier",
+]
+filterwarnings = ["ignore::UserWarning:importlib"]
