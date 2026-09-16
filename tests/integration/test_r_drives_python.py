@@ -18,6 +18,8 @@ def test_r_drives_python(tmp_path):
     script = tmp_path / "drive.R"
     script.write_text(f"""
 for (f in sort(list.files('{src}', pattern='[.]R$', full.names=TRUE))) source(f, encoding='UTF-8')
+cat("diag:", Sys.getenv("RPYTHON_PYTHON"), "| HOME", Sys.getenv("HOME"), "| PYTHONPATH", nchar(Sys.getenv("PYTHONPATH")), "chars
+")
 py <- python()
 stopifnot(py$run("1 + 1") == 2)
 np <- py$package("numpy")
@@ -46,8 +48,9 @@ cat("R-DRIVES-PYTHON-OK\n")
 """, encoding="utf-8")
     # PYTHONPATH=src so the R-launched interpreter imports this checkout regardless of how the
     # package was installed (editable finders are not visible on every CI toolchain).
-    src = os.path.join(ROOT, "src")
-    env = dict(os.environ, RPYTHON_PYTHON=sys.executable, PYTHONIOENCODING="utf-8",
-               PYTHONPATH=src + (os.pathsep + os.environ["PYTHONPATH"] if os.environ.get("PYTHONPATH") else ""))
+    # Hand the R-launched interpreter exactly the module search path of this pytest process: the
+    # test is about R driving Python, not about pip's site-packages layout on a given CI image.
+    paths = [os.path.join(ROOT, "src")] + [p for p in sys.path if p and os.path.isdir(p)]
+    env = dict(os.environ, RPYTHON_PYTHON=sys.executable, PYTHONIOENCODING="utf-8", PYTHONPATH=os.pathsep.join(paths))
     out = subprocess.run([inst.rscript, str(script)], capture_output=True, text=True, timeout=300, env=env, encoding="utf-8", errors="replace")
     assert "R-DRIVES-PYTHON-OK" in out.stdout, out.stdout + out.stderr
