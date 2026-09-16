@@ -57,6 +57,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/merwanroudane/rpython"
+PyPI = "https://pypi.org/project/rpython-bridge/"
 Repository = "https://github.com/merwanroudane/rpython"
 Issues = "https://github.com/merwanroudane/rpython/issues"
 

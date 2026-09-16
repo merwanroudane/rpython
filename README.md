@@ -5,6 +5,7 @@
 <h1 align="center">RPython — R and Python, one seamless research workspace</h1>
 
 <p align="center">
+  <a href="https://pypi.org/project/rpython-bridge/"><img alt="PyPI" src="https://img.shields.io/pypi/v/rpython-bridge?label=PyPI&color=2E6FDB"></a>
   <a href="https://github.com/merwanroudane/rpython/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/merwanroudane/rpython/ci.yml?branch=main&label=CI"></a>
   <img alt="Python" src="https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue">
   <img alt="R" src="https://img.shields.io/badge/R-%E2%89%A5%204.2-276DC3">
@@ -113,7 +114,7 @@ milliseconds per call for isolation and symmetry. See [docs/benchmarks.md](docs/
 
 ## Installation
 
-The distribution is named **`rpython-bridge`** on PyPI (the name `rpython` belongs to PyPy's toolchain); the import name is `rpython`.
+Published on PyPI as **[`rpython-bridge`](https://pypi.org/project/rpython-bridge/)** (the name `rpython` belongs to PyPy's toolchain); the import name is `rpython`.
 
 ```bash
 pip install rpython-bridge            # core (numpy + pandas)

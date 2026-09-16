@@ -2,6 +2,8 @@
 
 ## Python package
 
+Releases: https://pypi.org/project/rpython-bridge/
+
 ```bash
 pip install rpython-bridge                 # core: numpy, pandas
 pip install "rpython-bridge[all]"          # all optional families
