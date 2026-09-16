@@ -1,5 +1,4 @@
-"""Time series -- all major forms (sections 10, 12 of MASTER_PROMPT, 10 of the
-universal spec).
+"""Time series -- all major forms (design spec §10, 12 / §10).
 
 A time series crosses the boundary as a ``table`` envelope whose
 ``semantics.timeseries`` block carries what a bare table cannot::

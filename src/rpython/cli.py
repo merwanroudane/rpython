@@ -1,4 +1,4 @@
-"""Command-line interface (MASTER_PROMPT section 42).
+"""Command-line interface (design spec §42).
 
     rpython doctor            environment report
     rpython check             quick readiness check

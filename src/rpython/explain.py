@@ -1,4 +1,4 @@
-"""Explain Mode (MASTER_PROMPT section 33; universal spec section 70).
+"""Explain Mode (design spec §33).
 
 Every transfer records its :class:`~rpython.data.context.TransferPlan`.
 ``rp.explain_last()`` renders the most recent one; ``rp.explain(n)``
@@ -52,6 +52,7 @@ def explain_plan(obj: Any, print_it: bool = True) -> TransferPlan:
     ctx = Context(direction="py->r", target_runtime=Runtime.R)
     to_envelope(obj, ctx)
     ctx.plan.target = "R (dry run)"
+    record_plan(ctx.plan, "dry run")
     if print_it:
         print(ctx.plan.render())
     return ctx.plan

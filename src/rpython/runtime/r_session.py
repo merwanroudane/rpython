@@ -1,4 +1,4 @@
-"""Persistent, isolated R worker session (MASTER_PROMPT sections 7, 27-29).
+"""Persistent, isolated R worker session (design spec §7, 27-29).
 
 The R runtime always lives in its own process (``Rscript`` running the
 companion package's ``rpython_worker()``), so a crashing native R package

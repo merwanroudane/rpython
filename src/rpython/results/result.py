@@ -1,4 +1,4 @@
-"""Unified result model (MASTER_PROMPT section 29) and human-readable R errors."""
+"""Unified result model (design spec §29) and human-readable R errors."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -1,4 +1,4 @@
-"""README / docs examples are tests (MASTER_PROMPT section 51).
+"""README / docs examples are tests (design spec §51).
 
 Every ```python block in README.md and docs/*.md runs verbatim (blocks with
 notebook magics or shell lines are skipped).  Blocks that start an R session

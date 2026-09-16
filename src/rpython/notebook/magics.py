@@ -1,4 +1,4 @@
-"""Jupyter / Colab magics (MASTER_PROMPT section 25).
+"""Jupyter / Colab magics (design spec §25).
 
     %load_ext rpython          (or rp.setup())
 

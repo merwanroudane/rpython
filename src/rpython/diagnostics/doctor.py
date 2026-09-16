@@ -1,5 +1,5 @@
 """Diagnostics: ``doctor()``, ``check()``, ``self_test()``, ``fix()``, ``restore()``
-(MASTER_PROMPT sections 32, 52)."""
+(design spec §32, 52)."""
 from __future__ import annotations
 
 import os

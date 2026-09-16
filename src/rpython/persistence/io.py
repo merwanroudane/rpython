@@ -1,4 +1,4 @@
-"""Family-aware persistence (MASTER_PROMPT section 31; universal spec 66-67).
+"""Family-aware persistence (design spec §31 / §66-67).
 
 ``rp.save(obj, path)`` picks the writer from the *object family* and the
 file extension, and warns (or refuses, per policy) when the format

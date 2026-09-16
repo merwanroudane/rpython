@@ -1,4 +1,4 @@
-"""Reproducible benchmark suite (MASTER_PROMPT sections 19, 59).
+"""Reproducible benchmark suite (design spec §19, 59).
 
 Measures, with a live R worker:
   * worker startup

@@ -1,4 +1,4 @@
-"""Universal R object proxy (MASTER_PROMPT section 28).
+"""Universal R object proxy (design spec §28).
 
 An :class:`RObjectProxy` stands for an object that stays alive in the R
 worker: S3 models, S4 objects, R6 instances, closures, package-specific

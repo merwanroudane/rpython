@@ -1,6 +1,6 @@
 """Environment detection: find R and Python runtimes deterministically.
 
-Rules (MASTER_PROMPT section 22): never pick randomly among several R
+Rules (design spec §22): never pick randomly among several R
 installations.  Resolution order:
 
 1. ``rp.config(r_home=...)`` / ``RPYTHON_R_HOME`` environment variable

@@ -1,4 +1,4 @@
-"""Round-trip fidelity engine (MASTER_PROMPT section 34; universal spec 58-59, 77-78).
+"""Round-trip fidelity engine (design spec §34 / §58-59, 77-78).
 
 Equality is defined *per family* -- there is no single ``==`` rule:
 

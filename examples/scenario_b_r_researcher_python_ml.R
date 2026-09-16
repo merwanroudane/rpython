@@ -1,4 +1,4 @@
-# Scenario B -- an R researcher using Python machine learning (MASTER_PROMPT section 61).
+# Scenario B -- an R researcher using Python machine learning (design spec §61).
 #
 # 1. open R          2. load a data.frame             3. access scikit-learn
 # 4. split / train   5. receive predictions          6. return them to R

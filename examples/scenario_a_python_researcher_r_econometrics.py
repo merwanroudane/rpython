@@ -1,4 +1,4 @@
-"""Scenario A -- a Python researcher using R econometrics (MASTER_PROMPT section 61).
+"""Scenario A -- a Python researcher using R econometrics (design spec §61).
 
 1. load pandas data          2. declare the panel structure      3. load an R econometrics package
 4. pass the panel to R       5. fit a fixed-effects model         6. retrieve the summary

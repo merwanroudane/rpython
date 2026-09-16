@@ -1,4 +1,4 @@
-"""``rpython.lock`` -- unified reproducibility manifest (MASTER_PROMPT section 23).
+"""``rpython.lock`` -- unified reproducibility manifest (design spec §23).
 
 It orchestrates rather than replaces native lock systems: it records the
 Python interpreter + key packages (and points at pyproject/uv.lock/

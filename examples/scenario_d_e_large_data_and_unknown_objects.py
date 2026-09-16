@@ -1,4 +1,4 @@
-"""Scenarios D and E (MASTER_PROMPT section 61).
+"""Scenarios D and E (design spec §61).
 
 D. Large data: the planner selects Arrow IPC / lazy strategies; types survive; memory is guarded.
 E. Unknown package / custom object: an object no registry knows becomes a proxy whose methods work.

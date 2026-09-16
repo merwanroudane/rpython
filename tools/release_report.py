@@ -1,4 +1,4 @@
-"""Release readiness report from *real* test runs (MASTER_PROMPT section 55).
+"""Release readiness report from *real* test runs (design spec §55).
 
 Runs pytest with JUnit output, the R testthat suite, and R CMD check, then
 writes RELEASE_REPORT.md with per-subsystem passed/total counts.  Counts are
