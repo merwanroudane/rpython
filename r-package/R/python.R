@@ -13,6 +13,24 @@
 # in Python behind rpx_pyproxy handles; R objects sent to Python that have
 # no Python equivalent stay in R behind handles served by py_request().
 
+# R prepends its own library directories to LD_LIBRARY_PATH / DYLD_LIBRARY_PATH (see R's ldpaths).
+# A Python launched from R would then resolve a *different* libpython than its own (e.g. the OS
+# python's libpython3.12 instead of a pyenv/toolcache build) and fail with undefined symbols.
+# Give the child the loader path *without* R's additions; everything else is inherited.
+rpx_child_env <- function() {
+  if (.Platform$OS.type == "windows") return(character())
+  out <- character()
+  for (var in c("LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH", "DYLD_FALLBACK_LIBRARY_PATH")) {
+    cur <- Sys.getenv(var, unset = NA)
+    if (is.na(cur)) next
+    r_added <- unique(c(strsplit(Sys.getenv("R_LD_LIBRARY_PATH"), ":", fixed = TRUE)[[1]],
+                        file.path(R.home(), "lib"), file.path(R.home("lib"))))
+    keep <- setdiff(strsplit(cur, ":", fixed = TRUE)[[1]], c(r_added, ""))
+    out <- c(out, paste0(var, "=", paste(keep, collapse = ":")))
+  }
+  out
+}
+
 rpx_find_python <- function(python = NULL) {
   cands <- c(python, Sys.getenv("RPYTHON_PYTHON"), Sys.getenv("RETICULATE_PYTHON"),
              Sys.getenv("VIRTUAL_ENV") |> (\(v) if (nzchar(v)) file.path(v, if (.Platform$OS.type == "windows") "Scripts/python.exe" else "bin/python") else "")(),
@@ -21,7 +39,7 @@ rpx_find_python <- function(python = NULL) {
   cands <- unique(cands[nzchar(cands)])
   why <- character()
   for (p in cands) {
-    out <- tryCatch(suppressWarnings(system2(p, c("-c", shQuote("import rpython, sys; print(sys.version.split()[0])")), stdout = TRUE, stderr = TRUE)),
+    out <- tryCatch(suppressWarnings(system2(p, c("-c", shQuote("import rpython, sys; print(sys.version.split()[0])")), stdout = TRUE, stderr = TRUE, env = rpx_child_env())),
                     error = function(e) structure(conditionMessage(e), status = 1L))
     st <- attr(out, "status")
     last <- if (length(out)) utils::tail(out, 1) else ""
@@ -40,7 +58,7 @@ python_start <- function(python = NULL, timeout = 60) {
   # Python listens; R connects (avoids the blocking accept problem in base R).
   log <- tempfile("rpython-py-", fileext = ".log")
   args <- c("-m", "rpython.worker", "--port", port)
-  pid <- system2(info$path, args, stdout = log, stderr = log, wait = FALSE)
+  pid <- system2(info$path, args, stdout = log, stderr = log, wait = FALSE, env = rpx_child_env())
   deadline <- Sys.time() + timeout
   con <- NULL
   while (Sys.time() < deadline) {
