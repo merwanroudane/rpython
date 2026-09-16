@@ -6,6 +6,16 @@ on:
   pull_request:
 
 jobs:
+  versions:
+    name: version consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python tools/check_versions.py
+      - run: python tools/sync_r.py --check
+
   python-only:
     name: Python-only (no R) ${{ matrix.os }} / py${{ matrix.python }}
     runs-on: ${{ matrix.os }}
@@ -19,9 +29,8 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "${{ matrix.python }}" }
       - run: pip install -e ".[dev]"
-      - run: python tools/sync_r.py --check
       - name: unit / roundtrip / property / edge / database (R-marked tests skipped)
-        run: python -m pytest tests/unit tests/roundtrip tests/property tests/edge_cases tests/database -q -m "not r"
+        run: python -m pytest tests/unit tests/roundtrip tests/property tests/edge_cases tests/database -q -m "not r" -rfE
         env: { RPYTHON_SKIP_R: "1", PYTHONIOENCODING: utf-8 }
 
   interop:
@@ -31,7 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python: ["3.11", "3.12"]
+        python: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,23 +52,61 @@ jobs:
           working-directory: r-package
           extra-packages: any::testthat, any::arrow, any::data.table, any::Matrix, any::xts, any::zoo, any::haven, any::survival, any::sf, any::igraph, any::plm, any::duckdb, any::RSQLite, any::dbplyr, any::dplyr, any::ggplot2, any::tibble, any::R6, any::tsibble, any::bit64
       - run: pip install -e ".[dev]" pytest-timeout
-      - name: full Python suite (both directions, docs examples)
-        run: python -m pytest tests -q --timeout=900
+      - name: environment report
+        run: python -m rpython.cli doctor --no-r && python -m rpython.cli env
         env: { PYTHONIOENCODING: utf-8 }
+      - name: full Python suite (both directions, docs examples)
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest tests -q --timeout=900 -rfE --tb=short 2>&1 | tee pytest-output.txt
+        env: { PYTHONIOENCODING: utf-8, RPYTHON_PYTHON: python }
+      - name: publish failure summary (readable without login)
+        if: always()
+        shell: bash
+        run: |
+          echo "## pytest (${{ matrix.os }} / py${{ matrix.python }})" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          grep -E "^(FAILED|ERROR|E  |[0-9]+ (passed|failed)|=+ (short test summary|FAILURES|ERRORS))" pytest-output.txt | head -150 >> "$GITHUB_STEP_SUMMARY" || true
+          tail -n 60 pytest-output.txt >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "pytest-output-${{ matrix.os }}-py${{ matrix.python }}", path: pytest-output.txt }
       - name: R package check
+        shell: bash
         run: |
           R CMD build --no-build-vignettes r-package
-          R CMD check --no-manual rpython_*.tar.gz
+          R CMD check --no-manual rpython_*.tar.gz 2>&1 | tee rcheck-output.txt
+          grep -E "Status: OK|Status: [0-9]+ NOTE" rcheck-output.txt
         env: { RPYTHON_PYTHON: python, _R_CHECK_FORCE_SUGGESTS_: "false" }
-        shell: bash
 
-  build:
-    name: wheel / sdist
-    runs-on: ubuntu-latest
+  wheel:
+    name: wheel / sdist + clean install smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
+      - uses: r-lib/actions/setup-r@v2
+        with: { r-version: release, use-public-rspm: true }
+      - run: Rscript -e 'install.packages(c("jsonlite", "arrow"), repos = "https://cloud.r-project.org")'
       - run: pip install build twine && python -m build && twine check dist/*
+      - name: install the wheel into a clean venv and smoke-test it from outside the source tree
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          if [ -x "$RUNNER_TEMP/venv/bin/python" ]; then PY="$RUNNER_TEMP/venv/bin/python"; else PY="$RUNNER_TEMP/venv/Scripts/python.exe"; fi
+          "$PY" -m pip install --upgrade pip
+          "$PY" -m pip install dist/*.whl pyarrow
+          "$PY" -m pip check
+          cp tools/wheel_smoke.py "$RUNNER_TEMP/wheel_smoke.py"
+          cd "$RUNNER_TEMP" && "$PY" wheel_smoke.py
+        env: { PYTHONIOENCODING: utf-8 }
       - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest'
         with: { name: dist, path: dist/ }

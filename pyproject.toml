@@ -40,7 +40,9 @@ survival = ["lifelines>=0.27"]
 ml = ["torch>=2.0"]
 notebook = ["ipython>=8"]
 all = [
-    "rpython[arrow,polars,sparse,spatial,network,database,scientific,survey,survival,ml,notebook]",
+    "pyarrow>=14", "polars>=0.20", "scipy>=1.10", "shapely>=2.0", "pyproj>=3.5", "geopandas>=0.14",
+    "networkx>=3.0", "sqlalchemy>=2.0", "duckdb>=0.9", "xarray>=2023.1", "netCDF4", "pyreadstat>=1.2",
+    "lifelines>=0.27", "torch>=2.0", "ipython>=8",
 ]
 dev = [
     "pytest>=8",

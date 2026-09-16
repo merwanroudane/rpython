@@ -146,7 +146,7 @@ def cmd_catalog(a: argparse.Namespace) -> int:
                                    "requires": list(e.adapter.requires), "r_requires": list(e.adapter.r_requires),
                                    "available": e.adapter.available(), "tested": e.tested, "limitations": list(e.limitations)}
                                   for e in REGISTRY.entries()],
-                     "databases": dbreg.catalog()})
+                     "databases": dbreg.catalog(), "compatibility": __import__("rpython.compatibility", fromlist=["registry"]).registry()})
         return 0
     print("Object families (detection order):")
     for e in REGISTRY.entries():
@@ -155,6 +155,10 @@ def cmd_catalog(a: argparse.Namespace) -> int:
     print("\nDatabase backends:")
     for c in dbreg.catalog():
         print(f"  {c['backend']:14s} {c['category']:11s} py={','.join(c['python_requires']) or 'stdlib':22s} R={c['r_package'] or '-':12s} live-tested={c['tested_live']}")
+    from .compatibility import registry as compat_registry
+    print("\nCompatibility registry (packaged):")
+    for key, e in compat_registry().items():
+        print(f"  {key:22s} tested={','.join(e.get('tested_versions') or []) or '-':18s} {str(e.get('preferred_path', ''))[:70]}")
     return 0
 
 

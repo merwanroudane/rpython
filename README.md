@@ -8,7 +8,7 @@
   <a href="https://pypi.org/project/rpython-bridge/"><img alt="PyPI" src="https://img.shields.io/pypi/v/rpython-bridge?label=PyPI&color=2E6FDB"></a>
   <a href="https://github.com/merwanroudane/rpython/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/merwanroudane/rpython/ci.yml?branch=main&label=CI"></a>
   <img alt="Python" src="https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue">
-  <img alt="R" src="https://img.shields.io/badge/R-%E2%89%A5%204.2-276DC3">
+  <img alt="R" src="https://img.shields.io/badge/R-%E2%89%A5%204.1%20(verified%204.5)-276DC3">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
   <img alt="Semantic fidelity" src="https://img.shields.io/badge/round--trip-fidelity%20engine-orange">
 </p>
@@ -133,7 +133,7 @@ remotes::install_github("merwanroudane/rpython", subdir = "r-package")
 
 ### R prerequisites
 
-* R ≥ 4.2 (tested on 4.5) with **jsonlite** (`install.packages("jsonlite")`).
+* R ≥ 4.1 (native pipe / lambda syntax); verified on R 4.5 locally and on the current CRAN release in CI, with **jsonlite** (`install.packages("jsonlite")`).
 * Recommended for full semantic coverage: `arrow`, `data.table`, `Matrix`, `xts`, `zoo`, `haven`, `survival`,
   `sf`, `igraph`, `plm`, `terra`, `duckdb`, `RSQLite`, `dbplyr`, `ggplot2` — `rp.fix()` installs the core set.
 * RPython finds R through `rp.config(r_home=...)`, `RPYTHON_R_HOME`, `R_HOME`, `PATH`, the Windows registry and
@@ -492,7 +492,7 @@ hardware, Python/R/package versions and the exact commands. Numbers are only pub
 Capability detection over version pinning: the R worker reports what is installed, Arrow is used only when
 both sides have it, every optional Python dependency is probed at import, and each family has a documented
 fallback (Arrow → JSON → proxy). `compatibility/*.yaml` records tested versions and known issues; unknown
-packages are never blocked. CI runs on Linux, macOS and Windows with Python 3.11–3.13 and the current R release.
+packages are never blocked. CI runs the full R↔Python interop suite on Linux, macOS and Windows for Python 3.11, 3.12 and 3.13 with the current R release, plus a clean wheel-install smoke test; the README support table follows what CI verifies.
 
 ## Contributing
 

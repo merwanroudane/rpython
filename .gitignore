@@ -11,3 +11,14 @@ r-package/*.tar.gz
 .Rhistory
 .RData
 *.log
+
+# R artefacts
+.Rhistory
+.RData
+.Ruserdata
+Rplot*.png
+Rplots.pdf
+*.Rcheck/
+.ipynb_checkpoints/
+.venv*/
+rpython.lock

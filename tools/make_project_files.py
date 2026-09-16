@@ -7,7 +7,7 @@ import os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 files: dict[str, str] = {}
 
-files["compatibility/pandas.yaml"] = """package: pandas
+files["src/rpython/compatibility/pandas.yaml"] = """package: pandas
 runtime: python
 tested_versions: ["2.2", "3.0.5"]
 preferred_path: arrow-ipc (>= 5000 rows), json otherwise
@@ -17,7 +17,7 @@ notes:
   - PeriodDtype columns travel as ISO period strings with the dtype string for exact reconstruction
 fallback: json columns -> proxy
 """
-files["compatibility/pyarrow.yaml"] = """package: pyarrow
+files["src/rpython/compatibility/pyarrow.yaml"] = """package: pyarrow
 runtime: python
 tested_versions: ["25.0.1"]
 preferred_path: Feather v2 (Arrow IPC file) written to the session workdir
@@ -26,14 +26,14 @@ notes:
   - decimal/complex/interval columns fall back to the JSON path
 fallback: json
 """
-files["compatibility/polars.yaml"] = """package: polars
+files["src/rpython/compatibility/polars.yaml"] = """package: polars
 runtime: python
 tested_versions: ["1.44.1"]
 preferred_path: DataFrame.to_arrow() -> arrow-ipc; LazyFrame collected only under the memory guard
 notes:
   - a polars source comes back as polars on the return trip (tibble on the R side)
 """
-files["compatibility/arrow-r.yaml"] = """package: arrow
+files["src/rpython/compatibility/arrow-r.yaml"] = """package: arrow
 runtime: r
 tested_versions: ["21.0.0"]
 preferred_path: arrow::read_feather / write_feather; open_dataset for shared Parquet datasets
@@ -41,14 +41,14 @@ notes:
   - int64 columns are re-typed to bit64::integer64 only when values exceed the 32-bit range
   - missing arrow on the R side switches the planner to JSON and Explain Mode says so
 """
-files["compatibility/plm.yaml"] = """package: plm
+files["src/rpython/compatibility/plm.yaml"] = """package: plm
 runtime: r
 tested_versions: ["2.6-6"]
 preferred_path: pdata.frame(index = c(id, time)) when (id, time) keys are unique
 known_issues:
   - duplicate keys are rejected by plm -> data.frame + rpython.panel attribute is used instead (reported)
 """
-files["compatibility/sf.yaml"] = """package: sf
+files["src/rpython/compatibility/sf.yaml"] = """package: sf
 runtime: r
 tested_versions: ["1.0-21"]
 preferred_path: WKB (base64 in JSON / binary in Arrow) + CRS as WKT2/EPSG
@@ -56,7 +56,7 @@ known_issues:
   - spatial indexes are rebuilt on the target
   - sfg with Z/M dimensions: dimension flag reported, WKB carries the coordinates
 """
-files["compatibility/igraph.yaml"] = """package: igraph
+files["src/rpython/compatibility/igraph.yaml"] = """package: igraph
 runtime: r
 tested_versions: ["2.1.4"]
 preferred_path: graph_from_data_frame(edges, directed, vertices = nodes)
@@ -64,7 +64,7 @@ notes:
   - a non-"weight" weight attribute is aliased to E(g)$weight (igraph convention) and the alias dropped on return
   - integer node ids are restored as Python ints on the return trip
 """
-files["compatibility/networkx.yaml"] = """package: networkx
+files["src/rpython/compatibility/networkx.yaml"] = """package: networkx
 runtime: python
 tested_versions: ["3.6.1"]
 preferred_path: node/edge tables + features block
@@ -72,43 +72,43 @@ notes:
   - MultiGraph keys travel in the "key" column
   - non-scalar node ids (tuples ...) use a reversible id_map
 """
-files["compatibility/scipy.yaml"] = """package: scipy
+files["src/rpython/compatibility/scipy.yaml"] = """package: scipy
 runtime: python
 tested_versions: ["1.13.1"]
 preferred_path: csc/csr/coo -> Matrix dgC/dgR/dgT with 0-based indices
 known_issues:
   - dia/lil/dok/bsr are transported as csc (storage change reported)
 """
-files["compatibility/statsmodels.yaml"] = """package: statsmodels
+files["src/rpython/compatibility/statsmodels.yaml"] = """package: statsmodels
 runtime: python
 tested_versions: []
 preferred_path: results objects stay behind proxies; their tables (.params, .summary().tables) convert as pandas
 notes:
   - not exercised in CI yet; the generic path applies
 """
-files["compatibility/sklearn.yaml"] = """package: scikit-learn
+files["src/rpython/compatibility/sklearn.yaml"] = """package: scikit-learn
 runtime: python
 tested_versions: ["1.7"]
 preferred_path: estimators are proxies callable from R (fit/predict); numpy inputs/outputs convert natively
 """
-files["compatibility/ggplot2.yaml"] = """package: ggplot2
+files["src/rpython/compatibility/ggplot2.yaml"] = """package: ggplot2
 runtime: r
 tested_versions: ["4.0"]
 preferred_path: ggplot objects are proxies; printing renders to PNG via the worker device; .save() uses ggsave
 """
-files["compatibility/forecast.yaml"] = """package: forecast
+files["src/rpython/compatibility/forecast.yaml"] = """package: forecast
 runtime: r
 tested_versions: ["8.24"]
 preferred_path: forecast/Arima results stay as proxies; fitted/forecast ts components convert to pandas via field access
 """
-files["compatibility/fixest.yaml"] = """package: fixest
+files["src/rpython/compatibility/fixest.yaml"] = """package: fixest
 runtime: r
 tested_versions: []
 preferred_path: fixest objects are proxies; coef()/vcov()/summary() convert to pandas/numpy
 notes:
   - not exercised in CI yet; the generic path applies
 """
-files["compatibility/numpy.yaml"] = """package: numpy
+files["src/rpython/compatibility/numpy.yaml"] = """package: numpy
 runtime: python
 tested_versions: ["2.4.6"]
 preferred_path: json inline (< 50k elements) or arrow-ipc; memory order shipped explicitly

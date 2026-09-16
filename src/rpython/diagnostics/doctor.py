@@ -86,6 +86,15 @@ def doctor(print_it: bool = True, start_r: bool = True) -> Report:
     if not py.packages.get("pyarrow"):
         rep.issue("pyarrow missing: large tables fall back to JSON transfer", "pip install pyarrow")
     rep.add("Jupyter", "detected" if py.in_jupyter else "not active", OK if py.in_jupyter else WARN)
+    try:
+        from ..compatibility import registry as compat_registry
+        from ..runtime.r_session import r_source_dir
+        n_entries = len(compat_registry())
+        n_r = len([f for f in os.listdir(r_source_dir()) if f.endswith(".R")])
+        rep.add("Packaged resources", f"{n_entries} compatibility entries, {n_r} R companion files")
+    except Exception as e:  # noqa: BLE001
+        rep.add("Packaged resources", f"broken: {e}", FAIL)
+        rep.issue(f"packaged resources missing: {e}", "pip install --force-reinstall rpython-bridge")
     rep.data["python"] = py.to_dict()
     rep.data["r_candidates"] = [c.to_dict() for c in cands]
     if chosen is not None and start_r:

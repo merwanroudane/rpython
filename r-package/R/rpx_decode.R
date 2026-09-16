@@ -552,14 +552,9 @@ rpx_decode_labeled_array <- function(env) {
   attr(a, "rpython.coords") <- coords
   attr(a, "rpython.attrs") <- env$attrs
   attr(a, "rpython.name") <- env$name
-  if (rpx_has("stars") && length(dims) >= 2 && length(dims) <= 3) {
-    out <- tryCatch({
-      s <- stars::st_as_stars(a)
-      names(s) <- env$name %||% "value"
-      s
-    }, error = function(e) NULL)
-    if (!is.null(out)) { attr(out, "rpython.attrs") <- env$attrs; return(out) }
-  }
+  # A labelled scientific array is a plain R array with dimnames + rpython.* attributes.
+  # (It is deliberately NOT turned into a stars object: stars is for georeferenced rasters,
+  # and an xarray round trip must come back as an xarray, not as a raster.)
   class(a) <- c("rpython_labeled_array", class(a))
   a
 }

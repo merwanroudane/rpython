@@ -117,6 +117,34 @@ def run_r_check() -> tuple[str, str]:
     return ("R CMD check", status[-1].strip() if status else "no status line")
 
 
+def git(*args: str) -> str:
+    try:
+        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    except Exception:
+        return ""
+
+
+def ci_status(sha: str) -> list[tuple[str, str, str]]:
+    """(workflow, conclusion, url) for the GitHub Actions runs of this commit (public API, no auth)."""
+    import json
+    import urllib.request
+    try:
+        with urllib.request.urlopen(f"https://api.github.com/repos/merwanroudane/rpython/actions/runs?head_sha={sha}&per_page=20", timeout=20) as r:
+            runs = json.load(r)["workflow_runs"]
+        return [(x["name"], x["conclusion"] or x["status"], x["html_url"]) for x in runs]
+    except Exception as e:  # noqa: BLE001
+        return [("(GitHub API unavailable)", str(e)[:80], "")]
+
+
+def artifacts() -> list[tuple[str, str]]:
+    import hashlib
+    out = []
+    for f in sorted(glob.glob(os.path.join(ROOT, "dist", "*"))):
+        h = hashlib.sha256(open(f, "rb").read()).hexdigest()
+        out.append((os.path.basename(f), h))
+    return out
+
+
 def main() -> None:
     junit = os.path.join(tempfile.gettempdir(), "rpython-junit.xml")
     rc = run_pytest(junit)
@@ -128,9 +156,20 @@ def main() -> None:
     r_tests = run_r_tests()
     r_check = run_r_check()
     import importlib.metadata as md
+    sha = git("rev-parse", "HEAD")
+    tag = git("describe", "--tags", "--exact-match")
+    ci = ci_status(sha) if sha else []
+    ci_green = bool(ci) and all(c == "success" for _, c, _ in ci if not _.startswith("("))
+    arts = artifacts()
     lines = ["# Release readiness report", "",
-             f"Generated {dt.datetime.now().isoformat(timespec='minutes')} by `python tools/release_report.py` on {platform.platform()}, "
-             f"Python {platform.python_version()}, pandas {md.version('pandas')}, numpy {md.version('numpy')}.", "",
+             f"Generated {dt.datetime.now().isoformat(timespec='minutes')} by `python tools/release_report.py`.", "",
+             "| Field | Value |", "|---|---|",
+             f"| Version | {md.version('rpython-bridge') if _dist_installed() else 'n/a'} |",
+             f"| Commit SHA | `{sha}` |", f"| Git tag | {tag or '(none on this commit)'} |",
+             f"| Local platform | {platform.platform()} ({platform.machine()}) |",
+             f"| Python | {platform.python_version()}; pandas {md.version('pandas')}, numpy {md.version('numpy')} |",
+             f"| Test command | `python -m pytest tests -q --junitxml=...` (+ testthat, R CMD check) |", "",
+             "## 1. Local verification (this machine)", "",
              "Counts come from the JUnit output of the full pytest run; nothing here is typed by hand.", "",
              "| Subsystem | Passed / Total | Skipped | Status |", "|---|---|---|---|"]
     total_p = total_t = 0
@@ -144,7 +183,25 @@ def main() -> None:
     lines.append(f"| **All Python tests** | **{total_p} / {total_t}** | | **{'PASS' if total_p == total_t else 'FAIL'}** |")
     lines.append(f"| {r_tests[0]} | {r_tests[1]} | | |")
     lines.append(f"| {r_check[0]} | {r_check[1]} | | |")
-    lines += ["", "## Limitations recorded", "",
+    lines += ["", "## 2. GitHub CI verification (same commit)", ""]
+    if ci:
+        lines += ["| Workflow | Conclusion | Run |", "|---|---|---|"]
+        lines += [f"| {n} | {c} | {u} |" for n, c, u in ci]
+    else:
+        lines.append("_No CI runs found for this commit yet (push first, then re-run this script)._")
+    lines += ["", "## 3. Artifact verification", ""]
+    if arts:
+        lines += ["| File | SHA256 |", "|---|---|"] + [f"| {n} | `{h}` |" for n, h in arts]
+        lines.append("")
+        lines.append("Clean-install smoke test: `tools/wheel_smoke.py` (run by the `wheel` CI job from outside the source tree).")
+    else:
+        lines.append("_No dist/ artifacts present; run `python -m build`._")
+    verdict = "RELEASE-READY" if (total_p == total_t and "PASS" in r_tests[1] and r_check[1].startswith("OK") and ci_green) else "NOT RELEASE-READY"
+    reason = [] if verdict == "RELEASE-READY" else [x for x, ok in (("local pytest", total_p == total_t), ("testthat", "PASS" in r_tests[1]),
+                                                                         ("R CMD check", r_check[1].startswith("OK")), ("GitHub CI green on this SHA", ci_green)) if not ok]
+    lines += ["", f"## Verdict: **{verdict}**" + (f" — blocked by: {', '.join(reason)}" if reason else ""), "",
+              "A release is called ready only when local suites, R package checks **and** the GitHub CI runs of the same SHA are all green.", "",
+              "## Limitations recorded", "",
               "* Vendor databases other than SQLite/DuckDB/Parquet are interface-tested with fakes, not live (see `rpython catalog`).",
               "* R `ts` objects with frequencies other than 1/4/12 decode to a numeric time index.",
               "* Bioinformatics / chemistry / phylogenetics objects use the generic proxy path (adapters can be registered).",
@@ -158,3 +215,12 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+def _dist_installed() -> bool:
+    import importlib.metadata as md
+    try:
+        md.version("rpython-bridge")
+        return True
+    except md.PackageNotFoundError:
+        return False

@@ -15,6 +15,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 URL: https://github.com/merwanroudane/rpython
 BugReports: https://github.com/merwanroudane/rpython/issues
+Depends: R (>= 4.1)
 Imports: jsonlite, utils, stats, grDevices, methods, tools
 Suggests: arrow, data.table, tibble, sf, terra, stars, igraph, tidygraph, network, Matrix, zoo, xts, tsibble,
     RPostgres, RMariaDB, odbc, htmlwidgets, ncdf4, tuneR,

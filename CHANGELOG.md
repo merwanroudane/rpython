@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.1 (unreleased)
+
+Release-engineering corrections following the 0.1.0 audit:
+
+* Packaging: the `all` extra is an explicit union of runtime extras (it previously self-referenced the
+  distribution under the wrong name); the compatibility registry (`*.yaml`) now ships inside the package
+  (`rpython/compatibility/`) and is read through `importlib.resources` with a clear
+  `CompatibilityResourceError` instead of a silent empty registry; `rpython catalog` and `rp.doctor()` report it.
+* Conversion: labelled scientific arrays (xarray) are no longer turned into `stars` objects when *stars* is
+  installed in R — they stay R arrays with attributes, so an xarray round trip returns an xarray (this broke the
+  interop CI on every OS).
+* CI: interop matrix now covers Python 3.11–3.13 on Linux/macOS/Windows; new `wheel` job builds the
+  distribution and smoke-tests it from a clean venv outside the source tree (`tools/wheel_smoke.py`);
+  version-consistency gate (`tools/check_versions.py`); failure summaries published to the run page.
+* R package: `Depends: R (>= 4.1)` declared (native pipe / lambda syntax); README/docs claims aligned with
+  what CI verifies.
+* Release report split into local / CI / artifact sections with commit SHA, run URLs and artifact SHA256; a
+  release is only called ready when the CI runs of the same SHA are green.
+* Hygiene: stray `Rplot001.png` removed, R artefacts ignored; `docs/security.md` added.
+
 ## 0.1.0 (2026-09-16)
 
 First release.
