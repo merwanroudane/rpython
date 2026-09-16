@@ -1,0 +1,7 @@
+package: numpy
+runtime: python
+tested_versions: ["2.4.6"]
+preferred_path: json inline (< 50k elements) or arrow-ipc; memory order shipped explicitly
+notes:
+  - int8/int16/uint8/uint16 widen to R integer; float32 widens to double; dtype restored on round trip
+  - uint64 beyond int64 range is shipped as int64 strings (never rounded)

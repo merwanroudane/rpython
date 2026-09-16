@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="RPython hero">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1"><stop offset="0" stop-color="#1F2A44"/><stop offset="1" stop-color="#2E4A7A"/></linearGradient>
+    <linearGradient id="bridge" x1="0" x2="1"><stop offset="0" stop-color="#7FB0FF"/><stop offset="1" stop-color="#FFC27A"/></linearGradient>
+  </defs>
+  <rect width="1200" height="300" rx="24" fill="url(#bg)"/>
+  <g font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" fill="#FFFFFF">
+    <text x="60" y="110" font-size="44" font-weight="800">R and Python, one seamless research workspace.</text>
+    <text x="60" y="152" font-size="19" fill="#C9D6F2">Native R stays R. Native Python stays Python. RPython moves data, models, plots and databases</text>
+    <text x="60" y="180" font-size="19" fill="#C9D6F2">between them without losing what they mean: factors, time zones, panels, CRS, graph topology, sparsity.</text>
+  </g>
+  <g transform="translate(60,215)" font-family="ui-monospace, Consolas, monospace" font-size="15" fill="#E8EEFC">
+    <rect width="1080" height="56" rx="10" fill="#0F1930" opacity=".8"/>
+    <text x="18" y="24">r = rp.R();  r["df"] = panel;  fit = r("plm(y ~ x, data = df, model = &quot;within&quot;)");  fit.coef()</text>
+    <text x="18" y="46" fill="#FFC27A">library(rpython); py &lt;- python(); sk &lt;- py$package("sklearn.linear_model"); m &lt;- sk$LinearRegression()$fit(X, y)</text>
+  </g>
+  <g transform="translate(880,40)">
+    <circle cx="70" cy="70" r="56" fill="#0F1930" opacity=".7"/>
+    <text x="42" y="90" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="52" font-weight="800" fill="#7FB0FF">R</text>
+    <circle cx="230" cy="70" r="56" fill="#0F1930" opacity=".7"/>
+    <text x="196" y="88" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="40" font-weight="800" fill="#FFC27A">Py</text>
+    <path d="M130 58c26-10 44-10 70 0" fill="none" stroke="url(#bridge)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M130 82c26 10 44 10 70 0" fill="none" stroke="url(#bridge)" stroke-width="7" stroke-linecap="round"/>
+    <polygon points="198,48 212,58 198,68" fill="#FFC27A"/><polygon points="132,72 118,82 132,92" fill="#7FB0FF"/>
+  </g>
+</svg>

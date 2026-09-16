@@ -1,0 +1,7 @@
+package: igraph
+runtime: r
+tested_versions: ["2.1.4"]
+preferred_path: graph_from_data_frame(edges, directed, vertices = nodes)
+notes:
+  - a non-"weight" weight attribute is aliased to E(g)$weight (igraph convention) and the alias dropped on return
+  - integer node ids are restored as Python ints on the return trip

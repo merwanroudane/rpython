@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="RPython icon">
+  <rect width="64" height="64" rx="14" fill="#1F2A44"/>
+  <text x="10" y="42" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="28" font-weight="800" fill="#7FB0FF">R</text>
+  <path d="M28 26c6-2 10-2 16 0M28 38c6 2 10 2 16 0" fill="none" stroke="#F28C28" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="44,22 50,26 44,30" fill="#F28C28"/><polygon points="28,34 22,38 28,42" fill="#7FB0FF"/>
+  <text x="48" y="44" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="800" fill="#FFC27A">Py</text>
+</svg>

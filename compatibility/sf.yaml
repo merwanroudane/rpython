@@ -1,0 +1,7 @@
+package: sf
+runtime: r
+tested_versions: ["1.0-21"]
+preferred_path: WKB (base64 in JSON / binary in Arrow) + CRS as WKT2/EPSG
+known_issues:
+  - spatial indexes are rebuilt on the target
+  - sfg with Z/M dimensions: dimension flag reported, WKB carries the coordinates

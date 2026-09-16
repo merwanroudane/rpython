@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" height="330" font-family="ui-monospace, Consolas, monospace" font-size="14">
+  <rect width="900" height="330" rx="12" fill="#FFFFFF" stroke="#D8E0F0"/>
+  <text x="24" y="34" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1F2A44">Jupyter / Colab — mixed-language cells</text>
+  <rect x="24" y="52" width="852" height="88" rx="8" fill="#F7F9FE" stroke="#D8E0F0"/>
+  <text x="40" y="76" fill="#5B6B8A">[1]</text><text x="72" y="76" fill="#1F2A44">import rpython as rp, pandas as pd</text>
+  <text x="72" y="98" fill="#1F2A44">rp.setup()</text>
+  <text x="72" y="120" fill="#1F2A44">panel = rp.panel(pd.read_parquet("trade.parquet"), id="country", time="year")</text>
+  <rect x="24" y="152" width="852" height="88" rx="8" fill="#FFF8F0" stroke="#F5D9B8"/>
+  <text x="40" y="176" fill="#5B6B8A">[2]</text><text x="72" y="176" fill="#B45309">%%r -i panel -o fit</text>
+  <text x="72" y="198" fill="#1F2A44">library(plm)</text>
+  <text x="72" y="220" fill="#1F2A44">fit &lt;- plm(exports ~ gdp + tariff, data = panel, model = "within")</text>
+  <rect x="24" y="252" width="852" height="60" rx="8" fill="#F7F9FE" stroke="#D8E0F0"/>
+  <text x="40" y="276" fill="#5B6B8A">[3]</text><text x="72" y="276" fill="#1F2A44">fit.summary()        # R summary.plm proxy; fit.coef() -> pandas</text>
+  <text x="72" y="298" fill="#1F2A44">rp.explain_last()    # panel keys, balance, Arrow IPC, fidelity report</text>
+</svg>

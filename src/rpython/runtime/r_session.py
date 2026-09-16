@@ -158,9 +158,10 @@ class RSession:
 
     def _send(self, msg: dict[str, Any]) -> None:
         assert self.proc is not None and self.proc.stdin is not None
-        line = PROTO + json.dumps(msg, ensure_ascii=False, default=_json_default) + "\n"
+        payload = json.dumps(msg, ensure_ascii=False, default=_json_default).encode("utf-8")
+        frame = (PROTO + str(len(payload)) + "\n").encode("ascii") + payload   # length-prefixed: safe for huge messages
         try:
-            self.proc.stdin.write(line)
+            self.proc.stdin.buffer.write(frame)
             self.proc.stdin.flush()
         except (BrokenPipeError, OSError) as e:
             raise ConversionError("R worker is not running", runtime="r", cause=str(e),

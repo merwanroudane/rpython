@@ -1,0 +1,6 @@
+package: plm
+runtime: r
+tested_versions: ["2.6-6"]
+preferred_path: pdata.frame(index = c(id, time)) when (id, time) keys are unique
+known_issues:
+  - duplicate keys are rejected by plm -> data.frame + rpython.panel attribute is used instead (reported)

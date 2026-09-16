@@ -1,0 +1,9 @@
+package: pandas
+runtime: python
+tested_versions: ["2.2", "3.0.5"]
+preferred_path: arrow-ipc (>= 5000 rows), json otherwise
+notes:
+  - pandas 3 default string dtype "str" is preserved distinctly from "string" (StringDtype)
+  - float64 NaN is treated as missing (-> R NA) under missing="preserve"
+  - PeriodDtype columns travel as ISO period strings with the dtype string for exact reconstruction
+fallback: json columns -> proxy

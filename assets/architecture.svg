@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+  <style>.box{fill:#F4F7FD;stroke:#2E6FDB;stroke-width:2}.py{fill:#FFF4E8;stroke:#F28C28}.t{font-size:14px;fill:#1F2A44}.h{font-size:17px;font-weight:700;fill:#1F2A44}.s{font-size:12px;fill:#5B6B8A}.a{stroke:#5B6B8A;stroke-width:2;fill:none;marker-end:url(#m)}</style>
+  <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5 0 10z" fill="#5B6B8A"/></marker></defs>
+  <text x="500" y="34" text-anchor="middle" class="h" font-size="22">RPython architecture</text>
+  <rect x="40" y="70" width="920" height="90" rx="10" class="box py"/><text x="60" y="98" class="h">Public API (Python package) / rpython R package</text>
+  <text x="60" y="122" class="t">rp.R() · r("code") · r["x"] = obj · r.package() · proxies · rp.panel / timeseries / spatial / network · rp.connect · rp.save/load · %%r magics · rp.doctor / explain_last · python() from R</text>
+  <text x="60" y="146" class="s">Beginner: one line per operation. Advanced: transfer backend, lossy/missing policy, memory threshold, raw envelopes, custom adapters.</text>
+  <rect x="40" y="190" width="440" height="150" rx="10" class="box"/><text x="60" y="218" class="h">Semantic data layer</text>
+  <text x="60" y="244" class="t">Detection → classification (confirmed / inferred / suggestion)</text>
+  <text x="60" y="266" class="t">Type negotiation → transfer plan (json / arrow-ipc / shared file / lazy / proxy)</text>
+  <text x="60" y="288" class="t">Adapters per family: registry, tiers A→E, fidelity report</text>
+  <text x="60" y="310" class="s">src/rpython/data/* · memory guard · Explain Mode history</text>
+  <rect x="520" y="190" width="440" height="150" rx="10" class="box"/><text x="540" y="218" class="h">Database layer</text>
+  <text x="540" y="244" class="t">ConnectionRef (secret-free) + SecretVault</text>
+  <text x="540" y="266" class="t">Lazy Relation: pushdown, bound params, Arrow batches</text>
+  <text x="540" y="288" class="t">Adapters: SQL · DuckDB · lakes · document · KV · graph · TS · vector · search</text>
+  <text x="540" y="310" class="s">src/rpython/database/*</text>
+  <rect x="40" y="370" width="920" height="70" rx="10" class="box"/><text x="60" y="398" class="h">Portable envelope (RPX)</text>
+  <text x="60" y="422" class="t">JSON with explicit NA/NaN/Inf tokens + semantic sidecars · Arrow IPC files for columnar payloads · WKB for geometry · handles for proxies · shared paths for files / databases</text>
+  <rect x="40" y="470" width="440" height="70" rx="10" class="box py"/><text x="60" y="498" class="h">R companion package (isolated Rscript worker)</text>
+  <text x="60" y="522" class="t">rpx_encode / rpx_decode · sf, igraph, Matrix, xts, haven, survival, plm, terra …</text>
+  <rect x="520" y="470" width="440" height="70" rx="10" class="box py"/><text x="540" y="498" class="h">Python worker (driven by R)</text>
+  <text x="540" y="522" class="t">same protocol · pandas, numpy, sklearn, torch … · object store for proxies</text>
+  <path d="M260 160v30" class="a"/><path d="M740 160v30" class="a"/><path d="M260 340v30" class="a"/><path d="M740 340v30" class="a"/><path d="M260 440v30" class="a"/><path d="M740 440v30" class="a"/>
+</svg>

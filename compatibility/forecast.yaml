@@ -1,0 +1,4 @@
+package: forecast
+runtime: r
+tested_versions: ["8.24"]
+preferred_path: forecast/Arima results stay as proxies; fitted/forecast ts components convert to pandas via field access

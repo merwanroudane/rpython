@@ -22,15 +22,47 @@ rpx_send <- function(msg) {
   flush(.rpx_state$conn_out)
 }
 
-rpx_read <- function() {
+# Python -> R frames are length-prefixed ("@RPX@<nbytes>" newline payload-bytes): stdin line
+# reading on Windows can hand back partial lines for multi-megabyte messages, byte counts cannot.
+rpx_read_header <- function(con) {
+  buf <- raw(0)
   repeat {
-    line <- readLines(.rpx_state$conn_in, n = 1L, warn = FALSE, encoding = "UTF-8")
-    if (!length(line)) return(NULL)       # EOF: client went away
-    if (startsWith(line, "@RPX@")) {
-      return(jsonlite::fromJSON(substring(line, 6L), simplifyVector = FALSE))
+    b <- readBin(con, "raw", 1L)
+    if (!length(b)) return(NULL)
+    if (b == as.raw(10L)) break
+    buf <- c(buf, b)
+  }
+  rawToChar(buf)
+}
+
+rpx_read_payload <- function(con, n) {
+  out <- raw(0)
+  while (length(out) < n) {
+    chunk <- readBin(con, "raw", n - length(out))
+    if (!length(chunk)) return(NULL)
+    out <- c(out, chunk)
+  }
+  s <- rawToChar(out)
+  Encoding(s) <- "UTF-8"
+  s
+}
+
+rpx_read_frame <- function(con) {
+  repeat {
+    header <- rpx_read_header(con)
+    if (is.null(header)) return(NULL)                     # EOF: client went away
+    if (!startsWith(header, "@RPX@")) next                # stray output line: skip
+    n <- suppressWarnings(as.integer(substring(header, 6L)))
+    if (is.na(n)) {                                       # legacy single-line frame
+      return(jsonlite::fromJSON(substring(header, 6L), simplifyVector = FALSE))
     }
+    payload <- rpx_read_payload(con, n)
+    if (is.null(payload)) return(NULL)
+    return(jsonlite::fromJSON(payload, simplifyVector = FALSE))
   }
 }
+
+rpx_read <- function() rpx_read_frame(.rpx_state$conn_in)
 
 #' Ask the client (Python) to do something and wait for the answer.
 rpx_callback <- function(msg) {
@@ -316,16 +348,16 @@ rpx_help_text <- function(spec) {
     parts <- strsplit(spec, ":::?", perl = TRUE)[[1]]
     if (length(parts) != 2) return(NULL)
     db <- tools::Rd_db(parts[1])
+    tag_alias <- paste0(intToUtf8(92L), "alias")
     hit <- NULL
     for (nm in names(db)) {
       rd <- db[[nm]]
-      aliases <- unlist(lapply(rd, function(el) if (identical(attr(el, "Rd_tag"), "\alias")) as.character(el[[1]]) else NULL))
+      aliases <- unlist(lapply(rd, function(el) if (identical(attr(el, "Rd_tag"), tag_alias)) as.character(el[[1]]) else NULL))
       if (parts[2] %in% aliases) { hit <- rd; break }
     }
     if (is.null(hit)) return(NULL)
     txt <- utils::capture.output(tools::Rd2txt(hit, options = list(underline_titles = FALSE)))
-    paste(utils::head(txt, 60), collapse = "
-")
+    paste(utils::head(txt, 60), collapse = intToUtf8(10L))
   }, error = function(e) NULL)
 }
 
@@ -351,7 +383,7 @@ rpx_save_plot <- function(obj, path, width, height, dpi) {
 #' @export
 rpython_worker <- function(port = NULL, host = "127.0.0.1") {
   if (is.null(port)) {
-    .rpx_state$conn_in <- file("stdin", open = "r", blocking = TRUE, encoding = "UTF-8")
+    .rpx_state$conn_in <- file("stdin", open = "rb", blocking = TRUE)
     .rpx_state$conn_out <- stdout()
   } else {
     con <- socketConnection(host = host, port = as.integer(port), server = FALSE, blocking = TRUE, open = "r+b", encoding = "UTF-8")

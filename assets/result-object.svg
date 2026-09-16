@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+  <style>.k{font-size:14px;fill:#2E6FDB;font-weight:700}.v{font-size:13px;fill:#1F2A44}.h{font-size:17px;font-weight:700;fill:#1F2A44}</style>
+  <rect width="900" height="300" rx="12" fill="#F4F7FD" stroke="#D8E0F0"/>
+  <text x="24" y="36" class="h">res = r.eval("fit &lt;- lm(mpg ~ wt, mtcars); plot(fit); summary(fit)")</text>
+  <g transform="translate(24,60)">
+    <text x="0" y="24" class="k">res.value</text><text x="230" y="24" class="v">R summary.lm proxy — res.value.r_squared → 0.753, res.value.coefficients → array</text>
+    <text x="0" y="52" class="k">res.stdout</text><text x="230" y="52" class="v">captured console output (never lost)</text>
+    <text x="0" y="80" class="k">res.messages / res.warnings</text><text x="230" y="80" class="v">R messages and warnings as lists</text>
+    <text x="0" y="108" class="k">res.plots / res.plot</text><text x="230" y="108" class="v">PNG files with notebook display and .save("fig.svg")</text>
+    <text x="0" y="136" class="k">res.table / res.model</text><text x="230" y="136" class="v">typed views when the value is a DataFrame / model proxy</text>
+    <text x="0" y="164" class="k">res.raw</text><text x="230" y="164" class="v">the wire reply for advanced debugging</text>
+    <text x="0" y="192" class="k">r("1 + 1")</text><text x="230" y="192" class="v">plain values come back as plain Python (2.0) — no wrapper for scalars</text>
+  </g>
+</svg>

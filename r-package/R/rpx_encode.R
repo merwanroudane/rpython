@@ -215,6 +215,13 @@ rpx_encode <- function(x, top = TRUE) {
 rpx_encode_vector <- function(x) {
   type <- rpx_atomic_type(x)
   nm <- names(x)
+  # large unnamed numeric vectors: Arrow IPC instead of a multi-megabyte JSON list
+  if (is.null(nm) && length(x) >= 50000L && type %in% c("double", "integer", "logical") && rpx_use_arrow(length(x))) {
+    path <- rpx_new_file(".arrow")
+    arrow::write_feather(data.frame(values = x), path, compression = "uncompressed")
+    return(list(rpx = 1L, kind = "array", dtype = type, shape = list(length(x)), order = "F", dimnames = NULL,
+                mask = NULL, values = NULL, arrow = path, meta = list(source_class = paste(class(x), collapse = "/"))))
+  }
   meta <- list(source_class = paste(class(x), collapse = "/"))
   if (type == "datetime") meta$tz <- rpx_tz(x)
   if (type == "timedelta") meta$units <- attr(x, "units")

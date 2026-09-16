@@ -1,0 +1,6 @@
+package: fixest
+runtime: r
+tested_versions: []
+preferred_path: fixest objects are proxies; coef()/vcov()/summary() convert to pandas/numpy
+notes:
+  - not exercised in CI yet; the generic path applies

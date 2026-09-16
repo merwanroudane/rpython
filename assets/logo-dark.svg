@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96" width="320" height="96" role="img" aria-label="RPython">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#2E6FDB"/><stop offset="1" stop-color="#F28C28"/></linearGradient></defs>
+  <g transform="translate(8,8)">
+    <path d="M14 6h30a20 20 0 0 1 0 40H26v28H14z M26 18v16h18a8 8 0 0 0 0-16z" fill="#2E6FDB"/>
+    <path d="M30 46l24 28h-16L20 50z" fill="#2E6FDB" opacity=".9"/>
+    <path d="M60 40c20-4 34-4 54 0" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M60 56c20 4 34 4 54 0" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round"/>
+    <polygon points="112,32 124,40 112,48" fill="#F28C28"/><polygon points="62,48 50,56 62,64" fill="#2E6FDB"/>
+    <path d="M148 8h20c14 0 24 8 24 22s-10 22-24 22h-8v22h-12z M160 20v20h8c8 0 12-4 12-10s-4-10-12-10z" fill="#F28C28"/>
+  </g>
+  <text x="212" y="58" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="30" font-weight="700" fill="#FFFFFF">Python</text>
+  <text x="212" y="80" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#C9D6F2">one research workspace</text>
+</svg>

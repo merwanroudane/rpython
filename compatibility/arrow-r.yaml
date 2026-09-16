@@ -1,0 +1,7 @@
+package: arrow
+runtime: r
+tested_versions: ["21.0.0"]
+preferred_path: arrow::read_feather / write_feather; open_dataset for shared Parquet datasets
+notes:
+  - int64 columns are re-typed to bit64::integer64 only when values exceed the 32-bit range
+  - missing arrow on the R side switches the planner to JSON and Explain Mode says so

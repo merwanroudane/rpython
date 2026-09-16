@@ -1,0 +1,6 @@
+package: polars
+runtime: python
+tested_versions: ["1.44.1"]
+preferred_path: DataFrame.to_arrow() -> arrow-ipc; LazyFrame collected only under the memory guard
+notes:
+  - a polars source comes back as polars on the return trip (tibble on the R side)

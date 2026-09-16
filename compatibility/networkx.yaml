@@ -1,0 +1,7 @@
+package: networkx
+runtime: python
+tested_versions: ["3.6.1"]
+preferred_path: node/edge tables + features block
+notes:
+  - MultiGraph keys travel in the "key" column
+  - non-scalar node ids (tuples ...) use a reversible id_map

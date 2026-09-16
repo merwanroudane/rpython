@@ -1,0 +1,63 @@
+{
+ "rpython_lock": 1,
+ "created": "2026-09-16T13:02:56+00:00",
+ "platform": {
+  "system": "Windows",
+  "release": "10",
+  "machine": "AMD64"
+ },
+ "python": {
+  "version": "3.11.0",
+  "kind": "system",
+  "manager": null,
+  "packages": {
+   "numpy": "2.4.6",
+   "pandas": "3.0.5",
+   "pyarrow": "25.0.1",
+   "polars": "1.44.1",
+   "scipy": "1.13.1",
+   "xarray": "2026.7.0",
+   "networkx": "3.6.1",
+   "shapely": "2.1.2",
+   "duckdb": "1.5.5",
+   "sqlalchemy": "2.0.27",
+   "torch": "2.10.0",
+   "ipython": "9.9.0",
+   "matplotlib": "3.10.0"
+  },
+  "native_lock": null
+ },
+ "r": {
+  "version": "4.5.2",
+  "home": "C:\\Program Files\\R\\R-4.5.2",
+  "native_lock": null,
+  "packages": {
+   "arrow": "25.0.1",
+   "nanoarrow": "0.9.0",
+   "data.table": "1.18.0",
+   "tibble": "3.3.1",
+   "sf": "1.1-0",
+   "igraph": "2.2.1",
+   "tidygraph": "1.3.1",
+   "Matrix": "1.7-4",
+   "zoo": "1.9-0",
+   "xts": "0.14.1",
+   "tsibble": "1.2.0",
+   "haven": "2.5.5",
+   "survival": "3.8-3",
+   "plm": "2.6-7",
+   "bit64": "4.6.0-1",
+   "DBI": "1.2.3",
+   "RSQLite": "3.53.3",
+   "duckdb": "1.5.5",
+   "dbplyr": "2.5.1",
+   "dplyr": "1.1.4",
+   "ggplot2": "4.0.2",
+   "jsonlite": "2.0.0",
+   "R6": "2.6.1"
+  }
+ },
+ "backend": {
+  "transfer": "auto"
+ }
+}

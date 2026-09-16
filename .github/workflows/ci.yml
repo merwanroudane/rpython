@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python-only:
+    name: Python-only (no R) ${{ matrix.os }} / py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ matrix.python }}" }
+      - run: pip install -e ".[dev]"
+      - run: python tools/sync_r.py --check
+      - name: unit / roundtrip / property / edge / database (R-marked tests skipped)
+        run: python -m pytest tests/unit tests/roundtrip tests/property tests/edge_cases tests/database -q -m "not r"
+        env: { RPYTHON_SKIP_R: "1", PYTHONIOENCODING: utf-8 }
+
+  interop:
+    name: Interop with R ${{ matrix.os }} / py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ matrix.python }}" }
+      - uses: r-lib/actions/setup-r@v2
+        with: { r-version: release, use-public-rspm: true }
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: r-package
+          extra-packages: any::testthat, any::arrow, any::data.table, any::Matrix, any::xts, any::zoo, any::haven, any::survival, any::sf, any::igraph, any::plm, any::duckdb, any::RSQLite, any::dbplyr, any::dplyr, any::ggplot2, any::tibble, any::R6, any::tsibble, any::bit64
+      - run: pip install -e ".[dev]" pytest-timeout
+      - name: full Python suite (both directions, docs examples)
+        run: python -m pytest tests -q --timeout=900
+        env: { PYTHONIOENCODING: utf-8 }
+      - name: R package check
+        run: |
+          R CMD build --no-build-vignettes r-package
+          R CMD check --no-manual rpython_*.tar.gz
+        env: { RPYTHON_PYTHON: python, _R_CHECK_FORCE_SUGGESTS_: "false" }
+        shell: bash
+
+  build:
+    name: wheel / sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install build twine && python -m build && twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with: { name: dist, path: dist/ }

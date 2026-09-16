@@ -1,0 +1,6 @@
+package: scipy
+runtime: python
+tested_versions: ["1.13.1"]
+preferred_path: csc/csr/coo -> Matrix dgC/dgR/dgT with 0-based indices
+known_issues:
+  - dia/lil/dok/bsr are transported as csc (storage change reported)

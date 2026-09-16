@@ -1,0 +1,8 @@
+package: pyarrow
+runtime: python
+tested_versions: ["25.0.1"]
+preferred_path: Feather v2 (Arrow IPC file) written to the session workdir
+notes:
+  - dictionary columns keep the ordered flag; the semantic sidecar re-applies levels in R
+  - decimal/complex/interval columns fall back to the JSON path
+fallback: json

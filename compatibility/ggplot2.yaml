@@ -1,0 +1,4 @@
+package: ggplot2
+runtime: r
+tested_versions: ["4.0"]
+preferred_path: ggplot objects are proxies; printing renders to PNG via the worker device; .save() uses ggsave

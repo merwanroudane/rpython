@@ -83,11 +83,9 @@ py_send <- function(s, msg) {
 }
 
 py_read <- function(s) {
-  repeat {
-    line <- readLines(s$con, n = 1L, warn = FALSE, encoding = "UTF-8")
-    if (!length(line)) { s$alive <- FALSE; return(NULL) }
-    if (startsWith(line, "@RPX@")) return(jsonlite::fromJSON(substring(line, 6L), simplifyVector = FALSE))
-  }
+  msg <- rpx_read_frame(s$con)
+  if (is.null(msg)) s$alive <- FALSE
+  msg
 }
 
 # Serve a callback from Python (it wants something from R: an R proxy method, field, function call ...)

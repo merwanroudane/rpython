@@ -85,9 +85,9 @@ class ConnectionRef:
         ref = cls(backend, database=(u.path or "").lstrip("/") or None, host=u.hostname, port=u.port,
                   user=unquote(u.username) if u.username else None, **kw)
         if backend in ("sqlite", "duckdb"):
-            ref.database = url.split("://", 1)[1] or ":memory:"
-            if ref.database.startswith("/") and os.name == "nt" and len(ref.database) > 2 and ref.database[2] == ":":
-                ref.database = ref.database[1:]
+            # SQLAlchemy convention: scheme:///relative.db, scheme:////absolute.db, scheme:///C:/win.db
+            path = url.split("://", 1)[1].split("?", 1)[0]
+            ref.database = (path[1:] if path.startswith("/") else path) or ":memory:"
             ref.host = ref.port = ref.user = None
         if u.password:
             ref.secret_env = VAULT.put(unquote(u.password))

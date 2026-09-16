@@ -103,7 +103,8 @@ class PythonWorker:
 
     # ------------------------------------------------------------------ transport
     def send(self, msg: dict[str, Any]) -> None:
-        self.writer.write((PROTO + json.dumps(msg, ensure_ascii=False, default=_json_default) + "\n").encode("utf-8"))
+        payload = json.dumps(msg, ensure_ascii=False, default=_json_default).encode("utf-8")
+        self.writer.write((PROTO + str(len(payload)) + "\n").encode("ascii") + payload)   # length-prefixed frame
         self.writer.flush()
 
     def read(self) -> dict[str, Any] | None:

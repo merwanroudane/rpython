@@ -1,0 +1,6 @@
+package: statsmodels
+runtime: python
+tested_versions: []
+preferred_path: results objects stay behind proxies; their tables (.params, .summary().tables) convert as pandas
+notes:
+  - not exercised in CI yet; the generic path applies

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200" width="1000" height="200" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+  <style>.b{fill:#F4F7FD;stroke:#2E6FDB;stroke-width:2}.t{font-size:14px;fill:#1F2A44;font-weight:700}.s{font-size:12px;fill:#5B6B8A}.a{stroke:#5B6B8A;stroke-width:2;fill:none;marker-end:url(#m)}</style>
+  <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5 0 10z" fill="#5B6B8A"/></marker></defs>
+  <rect x="20" y="50" width="140" height="80" rx="10" class="b"/><text x="90" y="82" text-anchor="middle" class="t">Detection</text><text x="90" y="104" text-anchor="middle" class="s">what is this object?</text>
+  <rect x="185" y="50" width="140" height="80" rx="10" class="b"/><text x="255" y="82" text-anchor="middle" class="t">Classification</text><text x="255" y="104" text-anchor="middle" class="s">confirmed / suggested</text>
+  <rect x="350" y="50" width="140" height="80" rx="10" class="b"/><text x="420" y="82" text-anchor="middle" class="t">Negotiation</text><text x="420" y="104" text-anchor="middle" class="s">capabilities, size, cost</text>
+  <rect x="515" y="50" width="140" height="80" rx="10" class="b"/><text x="585" y="82" text-anchor="middle" class="t">Best path</text><text x="585" y="104" text-anchor="middle" class="s">native / Arrow / adapter / lazy</text>
+  <rect x="680" y="50" width="140" height="80" rx="10" class="b"/><text x="750" y="82" text-anchor="middle" class="t">Fidelity check</text><text x="750" y="104" text-anchor="middle" class="s">values, types, index, CRS …</text>
+  <rect x="845" y="50" width="140" height="80" rx="10" fill="#FFF4E8" stroke="#F28C28" stroke-width="2"/><text x="915" y="82" text-anchor="middle" class="t">Proxy fallback</text><text x="915" y="104" text-anchor="middle" class="s">object stays native</text>
+  <path d="M160 90h25M325 90h25M490 90h25M655 90h25M820 90h25" class="a"/>
+  <text x="500" y="170" text-anchor="middle" class="s">Every step is recorded: rp.explain_last() shows the plan, the notes, the risks and the fidelity report.</text>
+</svg>

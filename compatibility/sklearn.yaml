@@ -1,0 +1,4 @@
+package: scikit-learn
+runtime: python
+tested_versions: ["1.7"]
+preferred_path: estimators are proxies callable from R (fit/predict); numpy inputs/outputs convert natively
