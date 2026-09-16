@@ -363,7 +363,10 @@ rpx_help_text <- function(spec) {
 
 rpx_save_plot <- function(obj, path, width, height, dpi) {
   ext <- tolower(tools::file_ext(path))
-  if (inherits(obj, "ggplot") && rpx_has("ggplot2")) { ggplot2::ggsave(path, obj, width = width, height = height, dpi = dpi); return(invisible(path)) }
+  if (inherits(obj, "ggplot") && rpx_has("ggplot2") && !(ext == "svg" && !rpx_has("svglite"))) {
+    ggplot2::ggsave(path, obj, width = width, height = height, dpi = dpi)   # svg via svglite when available
+    return(invisible(path))
+  }
   if (inherits(obj, "htmlwidget")) { rpx_require("htmlwidgets"); htmlwidgets::saveWidget(obj, path, selfcontained = TRUE); return(invisible(path)) }
   dev <- switch(ext, png = function() grDevices::png(path, width = width, height = height, units = "in", res = dpi),
                 svg = function() grDevices::svg(path, width = width, height = height),

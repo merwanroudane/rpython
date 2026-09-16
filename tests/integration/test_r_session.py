@@ -123,7 +123,8 @@ def test_proxy_methods_fields(r):
 def test_packages_and_functions(r):
     stats = r.package("stats")
     assert stats.median([1, 2, 3, 10]) == 2.5
-    assert "auto.arima" in dir(r.package("forecast")) or True  # forecast optional
+    if r.installed("forecast")["forecast"]:
+        assert "auto.arima" in dir(r.package("forecast"))   # dotted names are listed as R spells them
     fn = r.function("paste")
     assert fn("a", "b", sep="-") == "a-b"
     sig = r.signature("stats::lm")
