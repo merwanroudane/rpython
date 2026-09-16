@@ -15,7 +15,7 @@ print(rp.check())   # True when R answers; rp.doctor() prints the full report
 * **Returns:** an `RSession`. Creating a second `rp.R(timeout=60)` with arguments starts a *new* worker.
 * **Mistake:** calling `rp.R()` in a loop expecting fresh state — the default session persists (`r.restart()` resets it).
 
-From R: `library(rpython); py <- python()` (needs `pip install rpython` in the chosen interpreter; set `RPYTHON_PYTHON` to pin it).
+From R: `library(rpython); py <- python()` (needs `pip install rpython-bridge` in the chosen interpreter; set `RPYTHON_PYTHON` to pin it).
 
 ## B. Packages
 
@@ -103,7 +103,7 @@ fit <- lm(y ~ x, data = df)
 ```
 
 `-i` sends notebook variables, `-o` brings R variables back, `-s` silent, `-v` prints Explain Mode after the cell.
-Plots display automatically. Colab: `!pip install rpython` then `rp.setup()`; `rpython lock` / `rp.restore()` for fresh runtimes.
+Plots display automatically. Colab: `!pip install rpython-bridge` then `rp.setup()`; `rpython lock` / `rp.restore()` for fresh runtimes.
 
 ## G. Save / load
 

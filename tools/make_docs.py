@@ -25,7 +25,7 @@ print(rp.check())   # True when R answers; rp.doctor() prints the full report
 * **Returns:** an `RSession`. Creating a second `rp.R(timeout=60)` with arguments starts a *new* worker.
 * **Mistake:** calling `rp.R()` in a loop expecting fresh state — the default session persists (`r.restart()` resets it).
 
-From R: `library(rpython); py <- python()` (needs `pip install rpython` in the chosen interpreter; set `RPYTHON_PYTHON` to pin it).
+From R: `library(rpython); py <- python()` (needs `pip install rpython-bridge` in the chosen interpreter; set `RPYTHON_PYTHON` to pin it).
 
 ## B. Packages
 
@@ -113,7 +113,7 @@ fit <- lm(y ~ x, data = df)
 ```
 
 `-i` sends notebook variables, `-o` brings R variables back, `-s` silent, `-v` prints Explain Mode after the cell.
-Plots display automatically. Colab: `!pip install rpython` then `rp.setup()`; `rpython lock` / `rp.restore()` for fresh runtimes.
+Plots display automatically. Colab: `!pip install rpython-bridge` then `rp.setup()`; `rpython lock` / `rp.restore()` for fresh runtimes.
 
 ## G. Save / load
 
@@ -148,9 +148,9 @@ docs["installation.md"] = r'''# Installation
 ## Python package
 
 ```bash
-pip install rpython                 # core: numpy, pandas
-pip install "rpython[all]"          # all optional families
-pip install "rpython[arrow,database,spatial]"
+pip install rpython-bridge                 # core: numpy, pandas
+pip install "rpython-bridge[all]"          # all optional families
+pip install "rpython-bridge[arrow,database,spatial]"
 ```
 
 | Extra | Adds | Enables |
@@ -418,7 +418,7 @@ import polars as pl
 Colab (fresh runtime):
 
 ```text
-!pip install "rpython[arrow]"
+!pip install "rpython-bridge[arrow]"
 import rpython as rp
 r = rp.setup()          # R is preinstalled on Colab; rp.doctor() otherwise explains how to add it
 r.install("plm")
@@ -471,7 +471,7 @@ See the table in the README first. Additional cases:
 * **`TimeoutError: R call exceeded N s`** — pass `timeout=None` to `rp.R()` or the call; long installations use `r.install(..., timeout=3600)`.
 * **R worker dies during a package call** — the Python process is intact; `r.restart()`; report the package with `rp.doctor()` output. The crash is isolated by design.
 * **Unicode garbled on Windows consoles** — set `PYTHONIOENCODING=utf-8`; data itself is UTF-8 end to end.
-* **`ConversionError: optional dependency missing`** — the message names the extra to install (`pip install "rpython[spatial]"`).
+* **`ConversionError: optional dependency missing`** — the message names the extra to install (`pip install "rpython-bridge[spatial]"`).
 * **`MemoryGuardError`** — use pushdown/lazy paths or `allow_materialize=True`.
 * **Proxy used after `r.close()`** — proxies belong to a session; reopen and recreate.
 '''

@@ -16,7 +16,7 @@ def code(text: str) -> dict:
 cells = [
     md("# RPython on Google Colab / Jupyter — quickstart\n\nFresh runtime → install → setup → R package → data transfer → plot → magics → diagnostics.\n\n"
        "On Colab uncomment the pip line. Locally, the package is already installed."),
-    code("# !pip install \"rpython[arrow]\"\nimport rpython as rp, pandas as pd, numpy as np\nr = rp.setup()   # detects R, starts the worker, loads the %r / %%r magics\nr"),
+    code("# !pip install \"rpython-bridge[arrow]\"\nimport rpython as rp, pandas as pd, numpy as np\nr = rp.setup()   # detects R, starts the worker, loads the %r / %%r magics\nr"),
     md("## Environment doctor"),
     code("rep = rp.doctor()\nassert rep.ok or True  # a warning-only report is fine on CI runners"),
     md("## Install and use an R package"),

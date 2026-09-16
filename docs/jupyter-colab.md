@@ -12,7 +12,7 @@ import polars as pl
 Colab (fresh runtime):
 
 ```text
-!pip install "rpython[arrow]"
+!pip install "rpython-bridge[arrow]"
 import rpython as rp
 r = rp.setup()          # R is preinstalled on Colab; rp.doctor() otherwise explains how to add it
 r.install("plm")

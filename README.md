@@ -46,7 +46,7 @@ still call. Everything RPython decides is inspectable with `rp.explain_last()`.
 
 ## What RPython is
 
-A Python package (`pip install rpython`) plus an R companion package (`r-package/`, same protocol) that
+A Python package (`pip install rpython-bridge`) plus an R companion package (`r-package/`, same protocol) that
 together give you:
 
 * **Native-feel Python:** `r = rp.R(); r["df"] = df; fit = r("lm(y ~ x, df)"); fit.coef()`
@@ -113,9 +113,11 @@ milliseconds per call for isolation and symmetry. See [docs/benchmarks.md](docs/
 
 ## Installation
 
+The distribution is named **`rpython-bridge`** on PyPI (the name `rpython` belongs to PyPy's toolchain); the import name is `rpython`.
+
 ```bash
-pip install rpython            # core (numpy + pandas)
-pip install "rpython[all]"     # + Arrow, Polars, SciPy, spatial, network, database, scientific, survey, ML, notebook extras
+pip install rpython-bridge            # core (numpy + pandas)
+pip install "rpython-bridge[all]"     # + Arrow, Polars, SciPy, spatial, network, database, scientific, survey, ML, notebook extras
 ```
 
 Extras: `arrow`, `polars`, `sparse`, `spatial`, `network`, `database`, `scientific`, `survey`, `survival`, `ml`, `notebook`.
@@ -324,7 +326,7 @@ Plots display automatically. `%%py` runs Python in the worker namespace (useful 
 ## Google Colab
 
 ```python
-!pip install "rpython[arrow]"
+!pip install "rpython-bridge[arrow]"
 import rpython as rp
 r = rp.setup()                 # detects Colab's R (or tells you how to provision it), loads the magics
 r.install("plm")

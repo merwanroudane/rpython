@@ -3,9 +3,9 @@
 ## Python package
 
 ```bash
-pip install rpython                 # core: numpy, pandas
-pip install "rpython[all]"          # all optional families
-pip install "rpython[arrow,database,spatial]"
+pip install rpython-bridge                 # core: numpy, pandas
+pip install "rpython-bridge[all]"          # all optional families
+pip install "rpython-bridge[arrow,database,spatial]"
 ```
 
 | Extra | Adds | Enables |
