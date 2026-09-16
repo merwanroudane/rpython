@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rpython-bridge"
-version = "0.1.0"
+version = "0.1.1"
 description = "High-level, bidirectional, semantic R <-> Python interoperability: data, models, plots, databases and notebooks without silent loss of meaning."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -40,7 +40,7 @@ from .persistence.io import save, load
 from .database.api import connect, relation, Relation, ConnectionRef
 from .diagnostics.doctor import doctor, check, self_test, fix, restore
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Merwan Roudane"
 
 

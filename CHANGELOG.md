@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1 (unreleased)
+## 0.1.1 (2026-09-16)
 
 Release-engineering corrections following the 0.1.0 audit:
 
@@ -19,6 +19,8 @@ Release-engineering corrections following the 0.1.0 audit:
 * Release report split into local / CI / artifact sections with commit SHA, run URLs and artifact SHA256; a
   release is only called ready when the CI runs of the same SHA are green.
 * Hygiene: stray `Rplot001.png` removed, R artefacts ignored; `docs/security.md` added.
+* Portability: SVG export requires `svglite` or a cairo-enabled R and verifies the written file; Python discovery from R
+  reports why each candidate interpreter was rejected; large R vectors use Arrow; Python→R messages are length-prefixed frames.
 
 ## 0.1.0 (2026-09-16)
 

@@ -1,7 +1,7 @@
 Package: rpython
 Type: Package
 Title: High-Level, Bidirectional, Semantic Interoperability Between R and 'Python'
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("Merwan", "Roudane", email = "merwanroudane920@gmail.com", role = c("aut", "cre", "cph"))
 Description: The R companion of the 'RPython' platform. Runs R as an isolated worker for
     the 'Python' package of the same name and, symmetrically, drives a 'Python' worker from

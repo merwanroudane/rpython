@@ -166,7 +166,7 @@ rpx_capabilities <- function() {
   list(r_version = as.character(getRversion()), r_home = R.home(), platform = R.version$platform,
        packages = as.list(have), workdir = rpx_workdir(), pid = Sys.getpid(), locale = Sys.getlocale("LC_CTYPE"),
        timezone = Sys.timezone(), encoding = "UTF-8", arrow = isTRUE(have[["arrow"]]),
-       rpython_version = "0.1.0")
+       rpython_version = "0.1.1")
 }
 
 rpx_handle <- function(req) {
