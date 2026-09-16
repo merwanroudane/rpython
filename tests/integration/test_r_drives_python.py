@@ -44,6 +44,10 @@ stopifnot(grepl("ZeroDivisionError", err))
 py$close()
 cat("R-DRIVES-PYTHON-OK\n")
 """, encoding="utf-8")
-    env = dict(os.environ, RPYTHON_PYTHON=sys.executable, PYTHONIOENCODING="utf-8")
+    # PYTHONPATH=src so the R-launched interpreter imports this checkout regardless of how the
+    # package was installed (editable finders are not visible on every CI toolchain).
+    src = os.path.join(ROOT, "src")
+    env = dict(os.environ, RPYTHON_PYTHON=sys.executable, PYTHONIOENCODING="utf-8",
+               PYTHONPATH=src + (os.pathsep + os.environ["PYTHONPATH"] if os.environ.get("PYTHONPATH") else ""))
     out = subprocess.run([inst.rscript, str(script)], capture_output=True, text=True, timeout=300, env=env, encoding="utf-8", errors="replace")
     assert "R-DRIVES-PYTHON-OK" in out.stdout, out.stdout + out.stderr
