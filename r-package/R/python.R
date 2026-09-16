@@ -18,15 +18,19 @@ rpx_find_python <- function(python = NULL) {
              Sys.getenv("VIRTUAL_ENV") |> (\(v) if (nzchar(v)) file.path(v, if (.Platform$OS.type == "windows") "Scripts/python.exe" else "bin/python") else "")(),
              Sys.getenv("CONDA_PREFIX") |> (\(v) if (nzchar(v)) file.path(v, if (.Platform$OS.type == "windows") "python.exe" else "bin/python") else "")(),
              Sys.which("python3"), Sys.which("python"))
-  cands <- cands[nzchar(cands)]
+  cands <- unique(cands[nzchar(cands)])
+  why <- character()
   for (p in cands) {
-    ok <- tryCatch(system2(p, c("-c", shQuote("import rpython, sys; print(sys.version.split()[0])")), stdout = TRUE, stderr = FALSE), error = function(e) character())
-    if (length(ok) && !is.null(attr(ok, "status")) && attr(ok, "status") != 0) next
-    if (length(ok) && grepl("^[0-9]", ok[1])) return(list(path = p, version = ok[1]))
+    out <- tryCatch(suppressWarnings(system2(p, c("-c", shQuote("import rpython, sys; print(sys.version.split()[0])")), stdout = TRUE, stderr = TRUE)),
+                    error = function(e) structure(conditionMessage(e), status = 1L))
+    st <- attr(out, "status")
+    last <- if (length(out)) utils::tail(out, 1) else ""
+    if ((is.null(st) || identical(as.integer(st), 0L)) && grepl("^[0-9]", last)) return(list(path = p, version = last))
+    why <- c(why, paste0("  ", p, " -> ", paste(utils::tail(out, 2), collapse = " | ")))
   }
   stop("No Python interpreter with the 'rpython' package found.\n",
-       "Tried: ", paste(cands, collapse = ", "), "\n",
-       "Recommended action: pip install rpython   (then set RPYTHON_PYTHON=<path to python> if it is not on PATH)")
+       paste(why, collapse = "\n"), "\n",
+       "Recommended action: pip install rpython-bridge   (then set RPYTHON_PYTHON=<path to python> if it is not on PATH)")
 }
 
 #' @export

@@ -144,8 +144,14 @@ def test_plots(r, tmp_path):
         g = r("ggplot2::ggplot(mtcars, ggplot2::aes(wt, mpg)) + ggplot2::geom_point()")
         assert isinstance(g, rp.RObjectProxy) and "ggplot" in g.rclass
         assert r.last.plot is not None
-        g.save(str(tmp_path / "g.svg"))
-        assert (tmp_path / "g.svg").stat().st_size > 1000
+        if r("nzchar(system.file(package = 'svglite')) || isTRUE(capabilities('cairo'))"):
+            g.save(str(tmp_path / "g.svg"))
+            assert (tmp_path / "g.svg").stat().st_size > 1000
+        else:
+            with pytest.raises(rp.RError, match="svglite"):
+                g.save(str(tmp_path / "g.svg"))
+        g.save(str(tmp_path / "g.pdf"))
+        assert (tmp_path / "g.pdf").stat().st_size > 1000
 
 
 def test_python_callables_and_objects_in_r(r):

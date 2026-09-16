@@ -50,7 +50,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: r-package
-          extra-packages: any::testthat, any::arrow, any::data.table, any::Matrix, any::xts, any::zoo, any::haven, any::survival, any::sf, any::igraph, any::plm, any::duckdb, any::RSQLite, any::dbplyr, any::dplyr, any::ggplot2, any::tibble, any::R6, any::tsibble, any::bit64
+          extra-packages: any::testthat, any::arrow, any::data.table, any::Matrix, any::xts, any::zoo, any::haven, any::survival, any::sf, any::igraph, any::plm, any::duckdb, any::RSQLite, any::dbplyr, any::dplyr, any::ggplot2, any::tibble, any::R6, any::tsibble, any::bit64, any::svglite
       - run: pip install -e ".[dev]" pytest-timeout
       - name: environment report
         run: python -m rpython.cli doctor --no-r && python -m rpython.cli env

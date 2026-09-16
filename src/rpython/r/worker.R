@@ -368,13 +368,17 @@ rpx_save_plot <- function(obj, path, width, height, dpi) {
     return(invisible(path))
   }
   if (inherits(obj, "htmlwidget")) { rpx_require("htmlwidgets"); htmlwidgets::saveWidget(obj, path, selfcontained = TRUE); return(invisible(path)) }
+  if (ext == "svg" && !rpx_has("svglite") && !isTRUE(capabilities("cairo"))) {
+    stop("SVG export needs the 'svglite' package (or an R built with cairo): install.packages('svglite'); or save as .png / .pdf")
+  }
   dev <- switch(ext, png = function() grDevices::png(path, width = width, height = height, units = "in", res = dpi),
                 svg = function() grDevices::svg(path, width = width, height = height),
                 pdf = function() grDevices::pdf(path, width = width, height = height),
                 jpg = , jpeg = function() grDevices::jpeg(path, width = width, height = height, units = "in", res = dpi),
                 stop("unsupported plot format: ", ext))
-  dev(); on.exit(grDevices::dev.off())
-  if (inherits(obj, "recordedplot")) grDevices::replayPlot(obj) else print(obj)
+  dev()
+  ok <- tryCatch({ if (inherits(obj, "recordedplot")) grDevices::replayPlot(obj) else print(obj); TRUE }, finally = grDevices::dev.off())
+  if (!file.exists(path) || file.info(path)$size == 0) stop("the graphics device wrote no file for ", path, " (device: ", ext, "); try .png or .pdf, or install.packages('svglite') for SVG")
   invisible(path)
 }
 
