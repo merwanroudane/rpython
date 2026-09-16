@@ -114,7 +114,7 @@ milliseconds per call for isolation and symmetry. See [docs/benchmarks.md](docs/
 
 ## Installation
 
-Published on PyPI as **[`rpython-bridge`](https://pypi.org/project/rpython-bridge/)** (the name `rpython` belongs to PyPy's toolchain); the import name is `rpython`.
+Published on PyPI as **[`rpython-bridge`](https://pypi.org/project/rpython-bridge/)** (latest: [0.1.1](https://pypi.org/project/rpython-bridge/0.1.1/), see [CHANGELOG](CHANGELOG.md)) (the name `rpython` belongs to PyPy's toolchain); the import name is `rpython`.
 
 ```bash
 pip install rpython-bridge            # core (numpy + pandas)

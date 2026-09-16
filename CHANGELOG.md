@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.1.1 (2026-09-16)
+## 0.1.2 (unreleased)
+
+* Python launched from R no longer inherits loader-path entries (`LD_LIBRARY_PATH`/`DYLD_LIBRARY_PATH`) that carry a
+  foreign `libpython`; R's own additions previously made a toolchain Python load the OS libpython.
+
+## 0.1.1 (2026-09-16) — [PyPI](https://pypi.org/project/rpython-bridge/0.1.1/)
 
 Release-engineering corrections following the 0.1.0 audit:
 
@@ -20,10 +25,9 @@ Release-engineering corrections following the 0.1.0 audit:
   release is only called ready when the CI runs of the same SHA are green.
 * Hygiene: stray `Rplot001.png` removed, R artefacts ignored; `docs/security.md` added.
 * Portability: SVG export requires `svglite` or a cairo-enabled R and verifies the written file; Python discovery from R
-  reports why each candidate interpreter was rejected and no longer inherits R's LD_LIBRARY_PATH additions (which made a
-  toolchain Python load the OS libpython); large R vectors use Arrow; Python→R messages are length-prefixed frames.
+  reports why each candidate interpreter was rejected; large R vectors use Arrow; Python→R messages are length-prefixed frames.
 
-## 0.1.0 (2026-09-16)
+## 0.1.0 (2026-09-16) — [PyPI](https://pypi.org/project/rpython-bridge/0.1.0/)
 
 First release.
 
