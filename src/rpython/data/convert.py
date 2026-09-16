@@ -26,7 +26,7 @@ def _load_builtin_adapters() -> None:
     import importlib
     for mod in ("arrays", "sparse", "tabular", "temporal", "panel", "survey", "survival",
                 "spatial", "raster", "spatiotemporal", "network", "text", "media",
-                "scientific", "economics", "custom"):
+                "scientific", "economics", "lazy", "custom"):
         importlib.import_module(f"rpython.data.{mod}")
 
 

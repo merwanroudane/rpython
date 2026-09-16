@@ -165,6 +165,7 @@ class RelationAdapter(Adapter):
                "schema": obj.schema(), "keys": obj.keys(), "meta": {"source_class": "rpython.Relation"}}
         ctx.record("database", ConversionPath.LAZY, "shared-connection",
                    f"{obj.ref.redacted()} opened by R with {obj.adapter.r_package}; query pushed down, 0 rows copied")
+        ctx.plan.extra["Rows copied"] = "0 (query pushdown)"
         ctx.plan.copies = 0
         ctx.plan.fidelity.set("laziness", Fidelity.LOSSLESS, "shared source")
         ctx.plan.fidelity.set("values", Fidelity.LOSSLESS, "same database")
@@ -177,7 +178,8 @@ class RelationAdapter(Adapter):
         if not conn_ref.get("backend"):
             return env
         ref = ConnectionRef(conn_ref["backend"], database=conn_ref.get("database"), host=conn_ref.get("host"), port=conn_ref.get("port"),
-                            user=conn_ref.get("user"), secret_env=conn_ref.get("secret_env"), schema=conn_ref.get("schema"))
+                            user=conn_ref.get("user"), secret_env=conn_ref.get("secret_env"), schema=conn_ref.get("schema"),
+                            read_only=bool(conn_ref.get("read_only", False)), options=dict(conn_ref.get("options") or {}))
         db = connect(ref)
         ctx.record("database", ConversionPath.LAZY, "shared-connection", "R DBI/dbplyr relation -> Python Relation (lazy)")
         if env.get("sql"):

@@ -135,6 +135,24 @@ rpx_user_attrs <- function(x, drop = c("names", "dim", "dimnames", "class", "row
 # main dispatcher
 # ---------------------------------------------------------------------------
 
+# Forced conversion (proxy$to_python()): S3 objects built on lists become plain lists
+# recursively; the class vector travels in meta so nothing is silently lost.
+rpx_encode_force <- function(x) {
+  if (is.list(x) && !is.data.frame(x) && !is.null(attr(x, "class")) && !inherits(x, c("sf", "igraph", "Surv", "ts", "xts", "zoo", "R6"))) {
+    cls <- class(x)
+    y <- unclass(x)
+    attr(y, "rpython_class") <- paste(cls, collapse = "/")
+    items <- lapply(seq_along(y), function(i) rpx_encode_force(y[[i]]))
+    nm <- names(y)
+    return(list(rpx = 1L, kind = "list", items = items, names = if (is.null(nm)) NULL else as.list(nm),
+                meta = list(source_class = paste(cls, collapse = "/"), r_class = as.list(cls), forced = TRUE)))
+  }
+  if (is.function(x) || is.environment(x) || isS4(x)) return(rpx_encode_proxy(x))
+  if (is.language(x)) return(list(rpx = 1L, kind = "vector", type = "character", values = as.list(paste(deparse(x), collapse = " ")),
+                                  names = NULL, scalar = TRUE, meta = list(source_class = "language")))
+  rpx_encode(x, top = FALSE)
+}
+
 rpx_encode <- function(x, top = TRUE) {
   if (is.null(x)) return(list(rpx = 1L, kind = "null"))
   if (inherits(x, "rpx_pyfunction")) return(list(rpx = 1L, kind = "proxy", runtime = "python", handle = attr(x, "handle"),
@@ -164,6 +182,10 @@ rpx_encode <- function(x, top = TRUE) {
   if (inherits(x, "ts")) return(rpx_encode_ts(x))
   if (inherits(x, "xts") || inherits(x, "zoo")) return(rpx_encode_xts(x))
   if (inherits(x, "rpython_db_relation")) return(unclass(x))
+  if (inherits(x, "rpython_mixed_frequency")) return(list(rpx = 1L, kind = "mixed_frequency", series = lapply(unclass(x)[names(x) != ""], rpx_encode, top = FALSE),
+                                                           target = attr(x, "rpython.target"), meta = list(source_class = "rpython_mixed_frequency")))
+  if (!is.null(attr(x, "rpython.economic"))) return(rpx_encode_economic_matrix(x))
+  if (!is.null(attr(x, "rpython.weights")) && !inherits(x, "listw")) return(rpx_encode_weights_matrix(x))
   if (inherits(x, "rpx_dataset")) return(rpx_encode_dataset(x))
   if (inherits(x, "ArrowObject")) return(rpx_encode_arrow(x))
   if (inherits(x, "tbl_lazy")) return(rpx_encode_lazy_tbl(x))
@@ -309,10 +331,10 @@ rpx_table_labels_block <- function(df) {
 }
 
 rpx_encode_table <- function(df, semantics = NULL, kind = "table", class_hint = NULL) {
-  df <- as.data.frame(df, stringsAsFactors = FALSE)
   if (is.null(class_hint)) {
     class_hint <- if (inherits(df, "data.table")) "data.table" else if (inherits(df, "tbl_df")) "tibble" else "data.frame"
   }
+  df <- as.data.frame(df, stringsAsFactors = FALSE)
   n <- nrow(df)
   use_arrow <- rpx_use_arrow(n) && rpx_arrow_encodable(df)
   cols <- lapply(names(df), function(nm) rpx_column_spec(df[[nm]], nm, inline = !use_arrow))
@@ -322,12 +344,14 @@ rpx_encode_table <- function(df, semantics = NULL, kind = "table", class_hint = 
   labels <- rpx_table_labels_block(df)
   sem <- if (is.null(semantics)) list() else semantics
   if (!is.null(labels) && is.null(sem$labels)) { sem$labels <- labels; if (kind == "table") kind <- "labelled" }
-  for (block in c("panel", "timeseries", "spatial", "text", "dyadic", "experiment", "simulation", "vintages", "roles")) {
+  for (block in c("panel", "timeseries", "spatial", "spatiotemporal", "text", "dyadic", "experiment", "simulation", "vintages", "roles")) {
     a <- attr(df, paste0("rpython.", block))
     if (!is.null(a) && is.null(sem[[block]])) sem[[block]] <- a
   }
   if (!is.null(sem$panel) && kind == "table") kind <- "panel"
   if (!is.null(sem$timeseries) && kind == "table") kind <- "timeseries"
+  for (k in c("dyadic", "experiment", "simulation", "vintages")) if (!is.null(sem[[k]]) && kind == "table") kind <- k
+  if (!is.null(sem$spatiotemporal) && kind == "spatial") kind <- "spatiotemporal"
   env <- list(rpx = 1L, kind = kind, nrow = n, columns = cols, arrow = NULL, index = NULL, row_names = row_names,
               attrs = attrs, semantics = sem,
               meta = list(source_class = paste(class(df), collapse = "/"), class_hint = class_hint, names = list()))
@@ -405,7 +429,8 @@ rpx_encode_xts <- function(x) {
   cls <- if (inherits(x, "xts")) "xts" else "zoo"
   core <- zoo::coredata(x)
   df <- if (is.null(dim(core))) data.frame(value = core) else as.data.frame(core)
-  if (is.null(dim(core)) && !is.null(attr(x, "rpython_name"))) names(df) <- attr(x, "rpython_name")
+  if (ncol(df) == 1 && !is.null(attr(x, "rpython_name"))) names(df) <- attr(x, "rpython_name")
+  if (ncol(df) == 1 && is.null(colnames(core)) && is.null(attr(x, "rpython_name"))) names(df) <- "value"
   tz <- if (inherits(idx, "POSIXct")) rpx_tz(idx) else "naive"
   if (inherits(idx, "Date")) idx <- as.POSIXct(format(idx), tz = "UTC")
   if (is.numeric(idx) && !inherits(idx, "POSIXct")) {
@@ -538,11 +563,14 @@ rpx_encode_igraph <- function(g) {
   if (inherits(g, "tbl_graph")) g <- tidygraph::as.igraph(g)
   vdf <- igraph::as_data_frame(g, what = "vertices")
   edf <- igraph::as_data_frame(g, what = "edges")
+  walias <- attr(g, "rpython_weight_attr")
+  if (!is.null(walias) && "weight" %in% names(edf)) edf$weight <- NULL
   if (!"name" %in% names(vdf)) vdf <- cbind(name = as.character(seq_len(igraph::vcount(g))), vdf)
   id_type <- attr(g, "rpython_id_type") %||% "character"
   if (id_type == "character" && all(grepl("^-?[0-9]+$", vdf$name))) id_type <- "integer"
+  wattr <- if (!is.null(walias)) walias else if (igraph::is_weighted(g)) "weight" else NULL
   features <- list(n_nodes = igraph::vcount(g), n_edges = igraph::ecount(g),
-                   weighted = igraph::is_weighted(g), weight_attr = if (igraph::is_weighted(g)) "weight" else NULL,
+                   weighted = !is.null(wattr), weight_attr = wattr,
                    self_loops = sum(igraph::which_loop(g)), parallel_edges = sum(igraph::which_multiple(g)),
                    bipartite = igraph::is_bipartite(g), bipartite_attr = if (igraph::is_bipartite(g)) "type" else NULL,
                    layers = if ("layer" %in% names(edf)) "layer" else NULL, temporal = if ("time" %in% names(edf)) "time" else NULL,
@@ -568,11 +596,15 @@ rpx_encode_surv <- function(s) {
   m <- unclass(s)
   cols <- colnames(m)
   py_type <- switch(type, right = "right", left = "left", interval = "interval", interval2 = "interval", counting = "counting", mstate = "mstate", type)
+  cols <- attr(s, "rpython.columns") %||% list(time = if (ncol(m) == 3) "start" else "time", time2 = if (ncol(m) == 3) "time2" else NULL, event = "status", id = NULL, strata = NULL)
+  cov <- attr(s, "rpython.covariates")
   env <- list(rpx = 1L, kind = "survival", type = py_type, time = rpx_double_values(m[, 1]), time2 = NULL,
-              event = rpx_double_values(m[, ncol(m)]), event_levels = NULL, id = NULL, strata = NULL,
-              columns = list(time = "time", time2 = NULL, event = "status", id = NULL, strata = NULL),
-              covariates = NULL, meta = list(source_class = "Surv", n = nrow(m)))
-  if (ncol(m) == 3) { env$time2 <- rpx_double_values(m[, 2]); env$columns$time2 <- "time2"; env$columns$time <- "start" }
+              event = rpx_double_values(m[, ncol(m)]), event_levels = NULL,
+              id = if (is.null(attr(s, "rpython.id"))) NULL else as.list(attr(s, "rpython.id")),
+              strata = if (is.null(attr(s, "rpython.strata"))) NULL else as.list(attr(s, "rpython.strata")),
+              columns = cols, covariates = if (is.null(cov)) NULL else rpx_encode_table(cov),
+              meta = list(source_class = "Surv", n = nrow(m)))
+  if (ncol(m) == 3) env$time2 <- rpx_double_values(m[, 2])
   if (type == "mstate") {
     st <- attr(s, "states"); env$event_levels <- as.list(c("censored", st))
     env$event <- as.list(c("censored", st)[m[, ncol(m)] + 1])
@@ -605,9 +637,31 @@ rpx_encode_listw <- function(w) {
   sm <- methods::as(Matrix::Matrix(m, sparse = TRUE), "dgCMatrix")
   env <- rpx_encode_sparse(sm)
   env$dimnames <- list(as.list(ids), as.list(ids))
-  list(rpx = 1L, kind = "spatial_weights", matrix = env, ids = as.list(ids), style = w$style, weights_kind = "custom",
-       k = NULL, bandwidth = NULL, directed = !isSymmetric(m), zero_policy = isTRUE(attr(w, "zero.policy")),
+  info <- attr(w, "rpython.weights") %||% list()
+  list(rpx = 1L, kind = "spatial_weights", matrix = env, ids = as.list(ids), style = w$style, weights_kind = info$weights_kind %||% "custom",
+       k = info$k, bandwidth = info$bandwidth, directed = !isSymmetric(m), zero_policy = isTRUE(attr(w, "zero.policy")),
        islands = as.list(ids[rowSums(m) == 0]), meta = list(source_class = "listw"))
+}
+
+rpx_encode_economic_matrix <- function(x) {
+  info <- attr(x, "rpython.economic")
+  y <- x; attr(y, "rpython.economic") <- NULL
+  m_env <- rpx_encode(y, top = FALSE)
+  list(rpx = 1L, kind = "economic_matrix", matrix = m_env, rows = as.list(rownames(x)), cols = as.list(colnames(x)),
+       matrix_kind = info$matrix_kind, orientation = info$orientation, units = info$units, year = info$year,
+       row_entity = info$row_entity %||% "sector", col_entity = info$col_entity %||% "sector", metadata = info$metadata %||% list(),
+       meta = list(source_class = "matrix+rpython.economic"))
+}
+
+rpx_encode_weights_matrix <- function(x) {
+  info <- attr(x, "rpython.weights")
+  y <- x; attr(y, "rpython.weights") <- NULL
+  ids <- rownames(x) %||% as.character(seq_len(nrow(x)))
+  m_env <- rpx_encode(y, top = FALSE)
+  rs <- if (inherits(x, "sparseMatrix")) Matrix::rowSums(x) else rowSums(x)
+  list(rpx = 1L, kind = "spatial_weights", matrix = m_env, ids = as.list(ids), style = info$style %||% "B", weights_kind = info$weights_kind %||% "custom",
+       k = info$k, bandwidth = info$bandwidth, directed = isTRUE(info$directed), zero_policy = isTRUE(info$zero_policy),
+       islands = as.list(ids[rs == 0]), meta = list(source_class = "matrix+rpython.weights"))
 }
 
 rpx_encode_labeled_array <- function(x) {

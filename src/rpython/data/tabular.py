@@ -107,7 +107,8 @@ def _dtype_semantic(s: pd.Series, ctx: Context | None) -> tuple[str, dict[str, A
     if dt.kind == "O":
         types = {classify_scalar(v) for v in s if v is not None and not _isna_scalar(v)}
         if not types:
-            return "logical", sem
+            sem["all_missing"] = True      # object column of None/NA only: comes back as object, not bool
+            return "character", sem
         if types <= {"list", "unknown"} or all(isinstance(v, (list, tuple, np.ndarray)) for v in s.dropna()):
             return "list", sem
         if all(isinstance(v, dict) for v in s.dropna()):
@@ -264,6 +265,8 @@ def _apply_semantic_from_arrow(s: pd.Series, rtype: str, sem: dict[str, Any]) ->
 def _restore_dtype(s: pd.Series, rtype: str, sem: dict[str, Any]) -> pd.Series:
     nullable = sem.get("nullable")
     try:
+        if sem.get("all_missing"):
+            return pd.Series([None] * len(s), index=s.index, name=s.name, dtype=object)
         if nullable:
             return s.astype(nullable)
         np_dtype = sem.get("np_dtype")
@@ -333,6 +336,9 @@ def _columns_unique(df: pd.DataFrame, ctx: Context) -> tuple[pd.DataFrame, dict[
 
 def encode_frame(df: pd.DataFrame, ctx: Context, semantics: dict[str, Any] | None = None,
                  class_hint: str = "data.frame", extra_meta: dict[str, Any] | None = None) -> dict[str, Any]:
+    hint = (getattr(df, "attrs", {}) or {}).get("rpython", {})
+    if class_hint == "data.frame" and isinstance(hint, dict) and hint.get("class_hint"):
+        class_hint = hint["class_hint"]          # tibble / data.table identity survives the round trip
     df2, index_info = _index_to_columns(df, ctx)
     df2, name_map = _columns_unique(df2, ctx)
     nrow = len(df2)

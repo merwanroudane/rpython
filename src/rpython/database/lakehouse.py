@@ -40,7 +40,8 @@ class ParquetLakeAdapter(DatabaseAdapter):
         p = path.replace("\\", "/")
         if os.path.isdir(p):
             p = p.rstrip("/") + "/**/*.parquet"
-        con.execute(f'CREATE OR REPLACE VIEW "{name}" AS SELECT * FROM read_parquet(?)', [p])
+        lit = "'" + p.replace("'", "''") + "'"    # DDL cannot take bound params; quote as a SQL literal
+        con.execute(f'CREATE OR REPLACE VIEW "{name}" AS SELECT * FROM read_parquet({lit})')
 
     def files(self, ref: ConnectionRef) -> list[str]:
         import glob
@@ -161,6 +162,7 @@ class PostGISAdapter(SQLAlchemyAdapter):
 class SpatiaLiteAdapter(SQLiteAdapter):
     backend = "spatialite"
     category = "spatial"
+    tested_live = False   # needs the mod_spatialite extension
 
     def connect(self, ref: ConnectionRef) -> Any:
         ref.options["spatialite"] = True

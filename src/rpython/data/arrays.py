@@ -119,7 +119,7 @@ class ArrayAdapter(Adapter):
         else:
             vals = encode_values(flat, rtype, ctx)
             if mask is not None:
-                vals = ["NA" if rtype == "double" else None if m else v for v, m in zip(vals, mask)]
+                vals = [("NA" if rtype == "double" else None) if m else v for v, m in zip(vals, mask)]
             env["values"] = vals
             ctx.record("array", ConversionPath.NATIVE, "json", f"{flat.size:,} elements inline")
         ctx.plan.shape = tuple(shape)
@@ -158,7 +158,7 @@ class ArrayAdapter(Adapter):
                     flat = np.asarray(flat)
             except Exception:
                 flat = np.asarray(flat)
-        arr = np.asarray(flat).reshape(shape, order=order) if shape else np.asarray(flat)
+        arr = np.asarray(flat).reshape(shape, order=order)
         np_dtype = meta.get("np_dtype")
         if np_dtype:
             try:

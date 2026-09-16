@@ -201,7 +201,7 @@ rpx_handle <- function(req) {
       },
       convert = {
         obj <- rpx_get_handle(req$handle)
-        list(id = id, ok = TRUE, value = rpx_encode(obj))
+        list(id = id, ok = TRUE, value = rpx_encode_force(obj))
       },
       release = { if (exists(req$handle, envir = .rpx_state$handles)) rm(list = req$handle, envir = .rpx_state$handles); list(id = id, ok = TRUE) },
       library = {
@@ -315,10 +315,17 @@ rpx_help_text <- function(spec) {
   tryCatch({
     parts <- strsplit(spec, ":::?", perl = TRUE)[[1]]
     if (length(parts) != 2) return(NULL)
-    h <- utils::help(parts[2], package = (parts[1]))
-    if (!length(h)) return(NULL)
-    txt <- utils::capture.output(tools::Rd2txt(utils:::.getHelpFile(h[1]), options = list(underline_titles = FALSE)))
-    paste(utils::head(txt, 60), collapse = "\n")
+    db <- tools::Rd_db(parts[1])
+    hit <- NULL
+    for (nm in names(db)) {
+      rd <- db[[nm]]
+      aliases <- unlist(lapply(rd, function(el) if (identical(attr(el, "Rd_tag"), "\alias")) as.character(el[[1]]) else NULL))
+      if (parts[2] %in% aliases) { hit <- rd; break }
+    }
+    if (is.null(hit)) return(NULL)
+    txt <- utils::capture.output(tools::Rd2txt(hit, options = list(underline_titles = FALSE)))
+    paste(utils::head(txt, 60), collapse = "
+")
   }, error = function(e) NULL)
 }
 

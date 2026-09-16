@@ -431,6 +431,7 @@ class ScalarAdapter(Adapter):
         rtype = classify_scalar(obj)
         if rtype == "null":
             ctx.record("scalar", ConversionPath.NATIVE, "json", "NULL")
+            ctx.plan.fidelity.set("values", Fidelity.LOSSLESS)
             return {"rpx": 1, "kind": "null"}
         meta: dict[str, Any] = {}
         if isinstance(obj, enum.Enum):
@@ -468,14 +469,19 @@ class ScalarAdapter(Adapter):
                 import pandas as pd
                 v = pd.Timedelta(v)
             return v
-        arr = decode_values(values, rtype, tz, ctx)
-        if meta.get("container") and meta["container"] not in ("dict", "OrderedDict", "defaultdict"):
+        if meta.get("container"):
+            # Python-origin collection: None <-> NA must survive exactly (NaN stays NaN)
             from .collections import restore_container
-            return restore_container(arr, meta)
+            items = [None if (v is None or (rtype == "double" and v == "NA")) else decode_scalar_value(v, rtype, tz) for v in values]
+            if rtype == "datetime":
+                items = [None if v is None else (v.to_pydatetime() if hasattr(v, "to_pydatetime") and not meta.get("source_class", "").endswith("Timestamp") else v) for v in items]
+            if meta["container"] in ("dict", "OrderedDict", "defaultdict"):
+                import collections as _c
+                pairs = zip(names or [], items)
+                return _c.OrderedDict(pairs) if meta["container"] == "OrderedDict" else dict(pairs)
+            return restore_container(items, meta)
+        arr = decode_values(values, rtype, tz, ctx)
         if names:
-            if meta.get("container") in ("dict", "OrderedDict", "defaultdict"):
-                from .collections import restore_container
-                return dict(zip(names, restore_container(arr, {"container": "list"})))
             import pandas as pd
             return pd.Series(arr, index=list(names))
         return arr

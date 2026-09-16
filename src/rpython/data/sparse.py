@@ -98,6 +98,10 @@ class SparseAdapter(Adapter):
             fmt = "csc"
         else:
             ctx.plan.fidelity.set("storage", Fidelity.LOSSLESS)
+        if fmt in ("csc", "csr"):
+            if not obj.has_sorted_indices:
+                obj = obj.copy()
+            obj.sort_indices()   # before encoding data: values and indices must align
         rtype = numpy_rtype(obj.data, ctx) if obj.data.size else "double"
         if rtype not in ("double", "integer", "logical", "int64", "complex"):
             raise TypeError(f"unsupported sparse dtype {obj.data.dtype}")
@@ -105,7 +109,6 @@ class SparseAdapter(Adapter):
                                "dtype": rtype, "data": encode_values(obj.data, rtype, ctx),
                                "dimnames": None, "symmetric": False, "triangular": None, "meta": meta}
         if fmt in ("csc", "csr"):
-            obj.sort_indices()
             env["indptr"] = obj.indptr.astype(np.int64).tolist()
             env["indices"] = obj.indices.astype(np.int64).tolist()
         else:

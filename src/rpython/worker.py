@@ -184,7 +184,17 @@ class PythonWorker:
             return {"handle": OBJECT_STORE.put(mod), "exports": names, "version": getattr(mod, "__version__", "")}
         if op == "getattr":
             obj = OBJECT_STORE.get(req["handle"]) if req.get("handle") else _USER_NS
-            attr = getattr(obj, req["name"]) if not isinstance(obj, dict) else obj[req["name"]]
+            if isinstance(obj, dict):
+                attr = obj[req["name"]]
+            else:
+                try:
+                    attr = getattr(obj, req["name"])
+                except AttributeError:
+                    import types
+                    if isinstance(obj, types.ModuleType):   # lazy submodule: sklearn.linear_model
+                        attr = importlib.import_module(f"{obj.__name__}.{req['name']}")
+                    else:
+                        raise
             if callable(attr) and not req.get("value"):
                 return {"value": {"rpx": 1, "kind": "proxy", "runtime": "python", "handle": OBJECT_STORE.put(attr), "callable": True,
                                   "class": [type(attr).__name__], "module": getattr(attr, "__module__", ""), "methods": [], "attributes": [],

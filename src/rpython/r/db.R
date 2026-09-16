@@ -16,7 +16,10 @@ rpx_connection_ref <- function(con) {
   ref <- list(backend = backend, database = info$dbname %||% info$db.version %||% NULL, host = info$host %||% NULL,
               port = info$port %||% NULL, user = info$username %||% info$user %||% NULL, secret_env = NULL)
   if (backend == "sqlite") ref$database <- info$dbname
-  if (backend == "duckdb") ref$database <- tryCatch(con@driver@dbdir, error = function(e) ":memory:")
+  if (backend == "duckdb") {
+    ref$database <- tryCatch(con@driver@dbdir, error = function(e) ":memory:")
+    ref$read_only <- tryCatch(isTRUE(con@driver@read_only), error = function(e) FALSE)
+  }
   ref
 }
 

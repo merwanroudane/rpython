@@ -44,6 +44,9 @@ def _eq_array(a: Any, b: Any) -> bool:
         return False
     if a.dtype.kind in "fc" and b.dtype.kind in "fc":
         return bool(np.array_equal(a, b, equal_nan=True))
+    if a.dtype.kind in "Mm" and b.dtype.kind in "Mm":
+        import pandas as pd
+        return pd.Series(a.ravel()).equals(pd.Series(b.ravel()))
     if a.dtype.kind == "O" or b.dtype.kind == "O":
         return all(_eq_scalar(x, y) for x, y in zip(a.ravel().tolist(), b.ravel().tolist()))
     return bool(np.array_equal(a, b))

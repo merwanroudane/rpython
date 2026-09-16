@@ -76,4 +76,5 @@ class DuckDBAdapter(DatabaseAdapter):
         reader = "read_parquet" if low.endswith((".parquet", ".pq")) else "read_csv_auto" if low.endswith((".csv", ".tsv")) else "read_json_auto" if low.endswith(".json") else None
         if reader is None:
             raise ValueError(f"unsupported file for DuckDB view: {path}")
-        conn.execute(f"CREATE OR REPLACE VIEW {self.quote(name)} AS SELECT * FROM {reader}(?)", [path])
+        lit = "'" + path.replace("'", "''") + "'"
+        conn.execute(f"CREATE OR REPLACE VIEW {self.quote(name)} AS SELECT * FROM {reader}({lit})")

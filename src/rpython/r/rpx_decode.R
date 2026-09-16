@@ -148,6 +148,11 @@ rpx_decode_array <- function(env) {
     vals[m] <- NA
   }
   if (length(shape) == 0) return(vals)
+  if (length(shape) == 1) {   # 1-d arrays are plain vectors in R (names kept if any)
+    dn <- env$dimnames
+    if (!is.null(dn) && !is.null(dn[[1]]) && length(dn[[1]])) names(vals) <- vapply(dn[[1]], as.character, character(1))
+    return(vals)
+  }
   if (identical(env$order, "C")) {
     a <- array(vals, dim = rev(shape))
     a <- aperm(a, rev(seq_along(shape)))
@@ -304,7 +309,7 @@ rpx_apply_labels <- function(df, lb) {
       if (!is.null(miss[[nm]]) || !is.null(rng[[nm]])) {
         na_values <- if (is.null(miss[[nm]])) NULL else unlist(miss[[nm]])
         na_range <- if (is.null(rng[[nm]])) NULL else unlist(rng[[nm]][[1]])
-        if (is.numeric(x)) { na_values <- as.numeric(na_values); na_range <- as.numeric(na_range) }
+        if (is.numeric(x)) { if (!is.null(na_values)) na_values <- as.numeric(na_values); if (!is.null(na_range)) na_range <- as.numeric(na_range) }
         x <- haven::labelled_spss(x, labels = labels, na_values = na_values, na_range = na_range, label = vars[[nm]])
       } else {
         x <- haven::labelled(x, labels = labels, label = vars[[nm]])
@@ -364,11 +369,11 @@ rpx_decode_timeseries <- function(env) {
     idx <- df[[tcol]]
     vals <- df[setdiff(names(df), tcol)]
     if (inherits(idx, "POSIXct") || inherits(idx, "Date")) {
-      core <- if (ncol(vals) == 1) vals[[1]] else as.matrix(vals)
+      core <- as.matrix(vals)   # keeps column names even for a single series
       if (rpx_has("xts")) {
         x <- tryCatch(xts::xts(core, order.by = idx), error = function(e) NULL)
         if (!is.null(x)) {
-          if (ncol(vals) == 1) attr(x, "rpython_name") <- names(vals)[1]
+          attr(x, "rpython_name") <- names(vals)[1]
           attr(x, "rpython.timeseries") <- sem
           return(x)
         }
@@ -487,6 +492,11 @@ rpx_decode_network <- function(env) {
   nodes <- nodes[c("name", setdiff(names(nodes), "name"))]
   g <- igraph::graph_from_data_frame(edges, directed = isTRUE(env$directed), vertices = nodes)
   for (nm in names(env$graph_attrs %||% list())) g <- igraph::set_graph_attr(g, nm, env$graph_attrs[[nm]])
+  wcol <- (env$columns %||% list())$weight
+  if (!is.null(wcol) && !identical(wcol, "weight") && wcol %in% igraph::edge_attr_names(g)) {
+    igraph::E(g)$weight <- igraph::edge_attr(g, wcol)   # igraph convention; alias dropped on the way back
+    attr(g, "rpython_weight_attr") <- wcol
+  }
   bip <- (env$columns %||% list())$bipartite
   if (!is.null(bip) && bip %in% igraph::vertex_attr_names(g) && !identical(bip, "type")) igraph::V(g)$type <- as.logical(igraph::vertex_attr(g, bip))
   attr(g, "rpython_id_type") <- env$node_id_type

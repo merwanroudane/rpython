@@ -284,12 +284,11 @@ class NetworkAdapter(Adapter):
         edges = edges.rename(columns={"from": src, "to": tgt})
         id_type = env.get("node_id_type", "character")
         if id_type == "integer":
-            nodes[node_id] = pd.to_numeric(nodes[node_id]).astype(int)
-            edges[src] = pd.to_numeric(edges[src]).astype(int)
-            edges[tgt] = pd.to_numeric(edges[tgt]).astype(int)
+            for df, c in ((nodes, node_id), (edges, src), (edges, tgt)):
+                df[c] = pd.Series([int(v) for v in pd.to_numeric(df[c])], index=df.index, dtype=object)   # plain ints, not np.int64
         elif id_type == "double":
             for df, c in ((nodes, node_id), (edges, src), (edges, tgt)):
-                df[c] = pd.to_numeric(df[c]).astype(float)
+                df[c] = pd.Series([float(v) for v in pd.to_numeric(df[c])], index=df.index, dtype=object)
         elif id_type == "encoded" and env.get("id_map"):
             from .convert import from_envelope
             m = {k: from_envelope(v, ctx) for k, v in env["id_map"].items()}

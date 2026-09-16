@@ -78,6 +78,9 @@ class TransferPlan:
             lines.append(f"Copies: {self.copies}")
         for k, v in self.extra.items():
             lines.append(f"{k}: {v}")
+        if self.history:
+            lines.append("Steps:")
+            lines.extend(f"  {h.step}: {h.note}" if h.note else f"  {h.step}" for h in self.history[-6:])
         for n in self.notes:
             lines.append(f"Note: {n}")
         for r in self.risks:

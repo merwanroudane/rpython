@@ -159,7 +159,15 @@ class CollectionAdapter(Adapter):
                 return (frozenset if container == "frozenset" else set)(items)
             except TypeError:
                 return items
+        if container in ("dict", "OrderedDict", "defaultdict") and not items:
+            return collections.OrderedDict() if container == "OrderedDict" else {}
         if names and all(names) and len(set(names)) == len(names):
+            if container == "OrderedDict":
+                return collections.OrderedDict(zip(names, items))
+            if container == "defaultdict":
+                d: Any = collections.defaultdict(None)
+                d.update(zip(names, items))
+                return d
             return dict(zip(names, items))
         if names and any(names):
             # duplicate / partial names: R semantics -> keep as list of pairs
@@ -216,7 +224,7 @@ def restore_container(values: Any, meta: dict[str, Any]) -> Any:
     if container is None:
         return values
     seq = list(values.tolist() if hasattr(values, "tolist") else values)
-    seq = [None if _isna(v) and meta.get("na_as_none", True) else v for v in seq]
+    seq = [None if _isna(v) else v for v in seq]
     if container == "tuple":
         return tuple(seq)
     if container == "set":
